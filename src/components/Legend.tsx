@@ -16,7 +16,40 @@ const SIZES = [
 export function Legend() {
   return (
     <section className={styles.legend} aria-label="Map legend" data-tour="legend">
-      {/* Aerosol on top; fire brightness and radiative power side by side below. Captions sit above each scale. */}
+      {/* Radiative power, then fire brightness, then aerosol, stacked. Captions sit above each scale. */}
+      <figure className={styles.scale}>
+        <figcaption>Fire spot radiative power</figcaption>
+        <ul className={styles.sizes}>
+          {SIZES.map(({ mw, r }) => (
+            <li key={mw}>
+              <span className={styles.dotBox} aria-hidden="true">
+                <span className={styles.dot} style={{ width: r * 2, height: r * 2 }} />
+              </span>
+              {mw} MW
+            </li>
+          ))}
+        </ul>
+      </figure>
+
+      <figure className={styles.scale}>
+        <figcaption>
+          Fire spot brightness (K)
+          <span className="sr-only">: colour runs from dark red at 300 kelvin to near-white at 367 kelvin.</span>
+        </figcaption>
+        <div className={styles.ramp} aria-hidden="true">
+          {STEPS.map((c) => (
+            <span key={c} style={{ background: c }} />
+          ))}
+        </div>
+        <div className={styles.ticks} aria-hidden="true">
+          {TICKS.map((t, i) => (
+            <span key={t} style={{ left: `${(i / (TICKS.length - 1)) * 100}%` }}>
+              {t}
+            </span>
+          ))}
+        </div>
+      </figure>
+
       <figure className={styles.scale}>
         <figcaption>
           Aerosol optical depth
@@ -31,41 +64,6 @@ export function Legend() {
           ))}
         </div>
       </figure>
-
-      <div className={styles.fire}>
-        <figure className={styles.scale}>
-          <figcaption>
-            Fire spot brightness (K)
-            <span className="sr-only">: colour runs from dark red at 300 kelvin to near-white at 367 kelvin.</span>
-          </figcaption>
-          <div className={styles.ramp} aria-hidden="true">
-            {STEPS.map((c) => (
-              <span key={c} style={{ background: c }} />
-            ))}
-          </div>
-          <div className={styles.ticks} aria-hidden="true">
-            {TICKS.map((t, i) => (
-              <span key={t} style={{ left: `${(i / (TICKS.length - 1)) * 100}%` }}>
-                {t}
-              </span>
-            ))}
-          </div>
-        </figure>
-
-        <figure className={styles.scale}>
-          <figcaption>Fire spot radiative power</figcaption>
-          <ul className={styles.sizes}>
-            {SIZES.map(({ mw, r }) => (
-              <li key={mw}>
-                <span className={styles.dotBox} aria-hidden="true">
-                  <span className={styles.dot} style={{ width: r * 2, height: r * 2 }} />
-                </span>
-                {mw} MW
-              </li>
-            ))}
-          </ul>
-        </figure>
-      </div>
     </section>
   )
 }

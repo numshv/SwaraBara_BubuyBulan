@@ -91,3 +91,10 @@ Goal: a dummy, interactable frontend mockup (in `src/`) of the wildfire data-son
 - Rendering (`src/map/smokeLayer.ts`): blurred AOD raster (extent; reduced-motion fallback) + up to 1,200 billowy puffs spawned where AOD > 0.35, drifting with the wind plus a slow curl, growing and fading over 5–9 s. Keeps drifting while paused. Thinned when zoomed in.
 - "Aerosol" sound-layer switch (AOD readout) also shows / hides the smoke. Legend: "Aerosol optical depth" 0–3+ in a second column beside the fire scales.
 - Audio mode: monthly summaries and region exploration add e.g. "Thick haze over Riau, AOD 3.1".
+
+## Dramatic effects experiment (added 2026-11-15)
+- Settings switch "Dramatic fire and smoke" (`prefs.dramaticFx`, default on) to compare with the calm look.
+- Burn scars (`src/map/scarLayer.ts`): every fire stamps a faint ash-black mark that never fades; accumulates into charred patches by 2025.
+- Fire (`src/map/fireLayer.ts`, `src/map/glowLayer.ts`): faint steady orange glow over hotspot areas (monthly fire density, smoothed across months, no per-dot bursts), barely-there shimmer, sparks from the hottest fires.
+- Smoke: sepia-brown and heavier. The whole-map orange sky tint was tried and removed (read as a flare).
+- Reduced motion: no shimmer/sparks; scars and hotspot glow stay as still layers.

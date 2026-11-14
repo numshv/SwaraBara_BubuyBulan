@@ -1,4 +1,4 @@
-/* Aerosol on top; fire brightness with radiative power to its right underneath. */
+/* Radiative power, fire brightness and aerosol stacked in one column. */
 .legend {
   display: grid;
   justify-items: start;
@@ -7,12 +7,6 @@
   color: var(--text-faint);
 }
 
-.fire {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: flex-start;
-  gap: 14px 28px;
-}
 
 .scale {
   display: grid;

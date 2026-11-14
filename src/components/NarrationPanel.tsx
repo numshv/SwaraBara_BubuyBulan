@@ -7,12 +7,10 @@ interface Props {
   cue: Cue
   index: number
   count: number
-  ari: number
-  hectares: number
   scope: string
 }
 
-export function NarrationPanel({ cue, index, count, ari, hectares, scope }: Props) {
+export function NarrationPanel({ cue, index, count, scope }: Props) {
   return (
     <aside className={styles.panel} aria-labelledby="narration-heading" data-tour="narration">
       <h2 id="narration-heading" className="sr-only">
@@ -27,15 +25,11 @@ export function NarrationPanel({ cue, index, count, ari, hectares, scope }: Prop
         <p className={styles.text}>{cue.text}</p>
       </div>
 
-      <div className={styles.counters} role="group" aria-label={`Impact so far, ${scope}`} data-tour="counters">
-        <Counter id="ari" label="people treated for respiratory infections (ARI)" value={ari} />
-        <Counter id="land" label="hectares of land burned" value={hectares} />
-      </div>
     </aside>
   )
 }
 
-/** Number over a bracketed hairline, after inspo-2's "8 / 54 / 1235" stats. */
+/** Number over a bracketed hairline, after inspo-2's "8 / 54 / 1235" stats. Used by the ending screen. */
 export function Counter({ id, label, value, big = false }: { id: 'ari' | 'land'; label: string; value: number; big?: boolean }) {
   return (
     <div className={big ? `${styles.counter} ${styles.big}` : styles.counter} data-counter={big ? undefined : id}>

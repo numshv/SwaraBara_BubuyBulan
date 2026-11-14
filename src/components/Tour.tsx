@@ -32,11 +32,6 @@ export const PLAY_STEPS: TourStep[] = [
     text: 'As the years pass, a narrator explains what is happening. The voice can be turned off in Settings, and N repeats the latest chapter.',
   },
   {
-    target: '[data-tour="counters"]',
-    title: 'Impact counters',
-    text: 'A running total of people treated for acute respiratory infections and of land burned. Watch where they end up.',
-  },
-  {
     target: '[data-tour="layers"]',
     title: 'Sound layers',
     text: 'Each data set is played by its own gamelan instrument; the bar shows how intense it is right now. Switch layers on or off to hear them separately. Wildfire and Aerosol also show or hide their layer on the map.',

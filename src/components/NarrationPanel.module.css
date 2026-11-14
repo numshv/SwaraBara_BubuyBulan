@@ -42,10 +42,6 @@
   color: var(--text-dim);
 }
 
-.counters {
-  display: grid;
-  gap: 18px;
-}
 
 .counter {
   display: grid;

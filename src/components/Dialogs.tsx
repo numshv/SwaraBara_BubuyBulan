@@ -42,6 +42,12 @@ export function SettingsDialog({ open, prefs, onChange, onClose }: SettingsProps
         disabled={!speechSupported || prefs.mode !== 'audio'}
         onChange={(v) => onChange({ builtInVoice: v })}
       />
+      <Switch
+        label="Dramatic fire and smoke"
+        description="Experimental: burn scars that stay, a faint glow over fire hotspots, sparks and heavier smoke."
+        checked={prefs.dramaticFx}
+        onChange={(v) => onChange({ dramaticFx: v })}
+      />
       {!speechSupported && <p className={styles.note}>This browser does not support speech, so voice options are unavailable.</p>}
 
       <div className={styles.row}>

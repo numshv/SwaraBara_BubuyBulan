@@ -1,9 +1,12 @@
 import { mulberry32 } from '../data/generate'
 import { LAT0, LON0, DLAT, DLON, NX, NY, aodBlend, cellIndex, windAt, type AerosolField } from '../data/aerosol'
-import { fit, projection, type View } from './projection'
+import { projection, type Placement, type View } from './projection'
 
+type RGB = [number, number, number]
 /** Warm grey, like wildfire smoke rather than cloud. */
-const SMOKE: [number, number, number] = [196, 188, 176]
+const SMOKE: RGB = [196, 188, 176]
+/** Dramatic mode: heavier, sepia-brown smoke. */
+const SMOKE_DRAMATIC: RGB = [138, 104, 78]
 const MAX_PUFFS = 1200
 /** Puffs only rise from cells hazier than this. */
 const PUFF_THRESHOLD = 0.35
@@ -28,13 +31,12 @@ interface Puff {
 }
 
 /** A lumpy cloud made of overlapping soft blobs, so puffs billow instead of looking like discs. */
-function makeCloudSprite(seed: number): HTMLCanvasElement {
+function makeCloudSprite(seed: number, [r, g, b]: RGB): HTMLCanvasElement {
   const size = 96
   const c = document.createElement('canvas')
   c.width = c.height = size
   const ctx = c.getContext('2d')!
   const rand = mulberry32(seed)
-  const [r, g, b] = SMOKE
   for (let i = 0; i < 9; i++) {
     const a = rand() * Math.PI * 2
     const d = rand() * size * 0.18
@@ -59,10 +61,13 @@ export class SmokeRenderer {
   private raster = document.createElement('canvas')
   private haze = document.createElement('canvas')
   private hazeKey = ''
-  private sprites = [11, 23, 37, 51].map(makeCloudSprite)
+  private sprites = [11, 23, 37, 51].map((s) => makeCloudSprite(s, SMOKE))
+  private dramaticSprites = [11, 23, 37, 51].map((s) => makeCloudSprite(s, SMOKE_DRAMATIC))
+  private dramatic = false
   private weights = new Float32Array(NX * NY)
   private totalWeight = 0
   private weightsT = Number.NaN
+  private lastT = Number.NaN
 
   constructor(private field: AerosolField) {
     this.raster.width = NX
@@ -82,8 +87,8 @@ export class SmokeRenderer {
   }
 
   /** Rebuilds the blurred haze only when the month, zoom or canvas size changes. */
-  private updateHaze(t: number, view: View, width: number, height: number, dpr: number) {
-    const key = `${Math.round(t / T_EPSILON)}|${view.k.toFixed(3)}|${view.x.toFixed(1)}|${view.y.toFixed(1)}|${width}|${height}`
+  private updateHaze(t: number, view: View, place: Placement, width: number, height: number, dpr: number) {
+    const key = `${this.dramatic}|${Math.round(t / T_EPSILON)}|${view.k.toFixed(3)}|${view.x.toFixed(1)}|${view.y.toFixed(1)}|${place.ox.toFixed(1)}|${place.oy.toFixed(1)}|${place.s.toFixed(4)}|${width}|${height}`
     if (key === this.hazeKey) return
     this.hazeKey = key
 
@@ -94,10 +99,11 @@ export class SmokeRenderer {
         const aod = aodBlend(this.field, t, cellIndex(i, j))
         // Canvas rows run north to south; the grid runs south to north.
         const o = ((NY - 1 - j) * NX + i) * 4
-        img.data[o] = SMOKE[0]
-        img.data[o + 1] = SMOKE[1]
-        img.data[o + 2] = SMOKE[2]
-        img.data[o + 3] = Math.round(Math.min(1, Math.max(0, (aod - 0.2) / 2.8)) * 90)
+        const [r, g, b] = this.dramatic ? SMOKE_DRAMATIC : SMOKE
+        img.data[o] = r
+        img.data[o + 1] = g
+        img.data[o + 2] = b
+        img.data[o + 3] = Math.round(Math.min(1, Math.max(0, (aod - 0.2) / 2.8)) * (this.dramatic ? 150 : 90))
       }
     }
     rctx.putImageData(img, 0, 0)
@@ -105,7 +111,7 @@ export class SmokeRenderer {
     this.haze.width = width
     this.haze.height = height
     const ctx = this.haze.getContext('2d')!
-    const { s, ox, oy } = fit(width / dpr, height / dpr)
+    const { s, ox, oy } = place
     ctx.setTransform(dpr * s, 0, 0, dpr * s, dpr * ox, dpr * oy)
     // The grid is near-equirectangular at these latitudes, so its corners are enough.
     const nw = projection([LON0 - DLON / 2, LAT0 + (NY - 0.5) * DLAT])!
@@ -152,7 +158,8 @@ export class SmokeRenderer {
   }
 
   /** dt in seconds of wall time; pass animate=false for a still frame (reduced motion). */
-  draw(canvas: HTMLCanvasElement, t: number, view: View, dt: number, animate: boolean) {
+  draw(canvas: HTMLCanvasElement, t: number, view: View, place: Placement, dt: number, animate: boolean, dramatic = false) {
+    this.dramatic = dramatic
     const ctx = canvas.getContext('2d')
     if (!ctx) return
     const dpr = window.devicePixelRatio || 1
@@ -165,7 +172,7 @@ export class SmokeRenderer {
     ctx.setTransform(1, 0, 0, 1, 0, 0)
     ctx.clearRect(0, 0, w, h)
 
-    this.updateHaze(t, view, w, h, dpr)
+    this.updateHaze(t, view, place, w, h, dpr)
     ctx.drawImage(this.haze, 0, 0)
 
     if (!animate) {
@@ -173,12 +180,16 @@ export class SmokeRenderer {
       return
     }
 
-    const { s, ox, oy } = fit(w / dpr, h / dpr)
+    const { s, ox, oy } = place
     ctx.setTransform(dpr * s, 0, 0, dpr * s, dpr * ox, dpr * oy)
+    // A seek or song change: let the old smoke clear quickly instead of drifting on for seconds.
+    if (Math.abs(t - this.lastT) > 1) for (const p of this.puffs) p.life = Math.min(p.life, p.age + 0.6)
+    this.lastT = t
     this.spawn(t, dt)
     const [wx, wy] = windAt(this.field, t)
     const pxPerDeg = (projection([1, 0])![0] - projection([0, 0])![0]) * view.k
-    const fade = zoomFade(view.k)
+    const fade = zoomFade(view.k) * (dramatic ? 1.6 : 1)
+    const sprites = dramatic ? this.dramaticSprites : this.sprites
     const alive: Puff[] = []
     for (const p of this.puffs) {
       p.age += dt
@@ -192,7 +203,7 @@ export class SmokeRenderer {
       const life = p.age / p.life
       const r = p.r0 * (1 + life * 1.6) * pxPerDeg
       ctx.globalAlpha = p.alpha * fade * Math.sin(Math.PI * life)
-      ctx.drawImage(this.sprites[p.sprite], view.x + q[0] * view.k - r, view.y + q[1] * view.k - r, r * 2, r * 2)
+      ctx.drawImage(sprites[p.sprite], view.x + q[0] * view.k - r, view.y + q[1] * view.k - r, r * 2, r * 2)
       alive.push(p)
     }
     ctx.globalAlpha = 1

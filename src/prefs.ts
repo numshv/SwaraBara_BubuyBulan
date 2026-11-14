@@ -8,6 +8,8 @@ export interface Prefs {
   narrationVoice: boolean
   /** Audio mode: speak all announcements for visitors without a screen reader. */
   builtInVoice: boolean
+  /** Experiment: burn scars, hotspot glow, sparks and darker smoke. */
+  dramaticFx: boolean
   introTourDone: boolean
   playTourDone: boolean
 }
@@ -17,6 +19,7 @@ const DEFAULTS: Prefs = {
   mode: null,
   narrationVoice: true,
   builtInVoice: false,
+  dramaticFx: true,
   introTourDone: false,
   playTourDone: false,
 }

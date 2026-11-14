@@ -4,8 +4,10 @@
   display: grid;
   grid-template-rows: auto minmax(0, 1fr) auto;
   gap: 20px;
-  padding: 20px 32px 14px;
+  padding: 20px 32px 32px;
   background: var(--bg);
+  /* The full-bleed map surface is trimmed at the page edge instead of making the page scroll. */
+  overflow: clip;
   animation: fade-in var(--t-slow) var(--ease) backwards;
 }
 
@@ -30,6 +32,15 @@
 
 .skip:focus {
   top: 12px;
+}
+
+/* Everything that isn't the map stacks above the full-bleed map surface. */
+.header,
+.main > aside,
+.side,
+.bottom {
+  position: relative;
+  z-index: 2;
 }
 
 .header {
@@ -113,6 +124,7 @@
 .mapArea {
   grid-column: 2;
   position: relative;
+  z-index: 0;
   min-height: 0;
   transition: filter var(--t-slow) var(--ease), opacity var(--t-slow) var(--ease);
 }
@@ -172,6 +184,11 @@
   gap: 16px 32px;
 }
 
+/* The player stays pinned to the bottom edge, however tall the legend beside it grows. */
+.bottom > section {
+  align-self: end;
+}
+
 .bottomSide:last-of-type {
   justify-self: end;
 }
@@ -201,7 +218,7 @@
 /* Tablet landscape: compress. */
 @media (max-width: 1279px) {
   .app {
-    padding: 18px 20px 12px;
+    padding: 18px 20px 28px;
   }
 
   .bottom {

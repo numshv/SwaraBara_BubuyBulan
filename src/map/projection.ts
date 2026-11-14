@@ -40,8 +40,15 @@ export function toView([lon, lat]: [number, number], v: View): [number, number] 
   return [v.x + px * v.k, v.y + py * v.k]
 }
 
+/** Where viewBox units land on a drawing surface: CSS px = o + unit × s. */
+export interface Placement {
+  s: number
+  ox: number
+  oy: number
+}
+
 /** Letterboxing used by preserveAspectRatio="xMidYMid meet". */
-export function fit(width: number, height: number) {
+export function fit(width: number, height: number): Placement {
   const s = Math.min(width / VW, height / VH)
   return { s, ox: (width - VW * s) / 2, oy: (height - VH * s) / 2 }
 }

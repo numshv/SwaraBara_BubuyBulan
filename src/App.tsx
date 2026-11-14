@@ -13,7 +13,7 @@ import { LAYER_NAMES, SoundLayers, type LayerId, type Layers } from './component
 import { INTRO_STEPS, PLAY_STEPS, Tour } from './components/Tour'
 import { describeHaze, getAerosol, type AerosolField } from './data/aerosol'
 import { getClimate } from './data/climate'
-import { cumulativeAt, getSongs, type SongData } from './data/generate'
+import { getSongs, type SongData } from './data/generate'
 import { CUES, INTRO_TEXT, cueIndexAt, type Cue } from './data/narration'
 import { REGIONS, REGION_BY_ID, songName, songTitle, type RegionId, type SongId } from './data/regions'
 import { MONTH_COUNT, clampFrame, frameLabel, frameMonth, formatNumber } from './data/time'
@@ -322,8 +322,6 @@ function Experience({ prefs, update }: { prefs: Prefs; update: (p: Partial<Prefs
   }
 
   const national = song === 'indonesia'
-  const ari = cumulativeAt(data.cumulativeAri, clock.t)
-  const hectares = cumulativeAt(data.cumulativeHectares, clock.t)
   const showEnd = clock.ended && !endDismissed
 
   return (
@@ -376,8 +374,6 @@ function Experience({ prefs, update }: { prefs: Prefs; update: (p: Partial<Prefs
             cue={cues[cueIdx]}
             index={cueIdx}
             count={cues.length}
-            ari={ari}
-            hectares={hectares}
             scope={songName(song)}
           />
         )}
@@ -389,6 +385,7 @@ function Experience({ prefs, update }: { prefs: Prefs; update: (p: Partial<Prefs
             wildfireOn={layers.wildfire}
             aerosol={aerosol}
             smokeOn={layers.aerosol}
+            dramatic={prefs.dramaticFx}
             reducedMotion={reducedMotion}
             onOpenRegion={openRegion}
             onExploreRegion={exploreRegion}

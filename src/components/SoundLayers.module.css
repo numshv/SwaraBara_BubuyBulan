@@ -36,14 +36,15 @@
   border: 0;
 }
 
+/* Solid track, no outline (see .scratch/toggle-example.png): grey when off, layer colour when on. */
 .pill {
   grid-area: pill;
   position: relative;
   width: 26px;
   height: 14px;
   border-radius: 7px;
-  border: 1px solid var(--rule-strong);
-  transition: background var(--t-fast) var(--ease), border-color var(--t-fast) var(--ease);
+  background: #4a4a4a;
+  transition: background var(--t-fast) var(--ease);
 }
 
 .pill::after {
@@ -51,21 +52,20 @@
   position: absolute;
   top: 2px;
   left: 2px;
-  width: 8px;
-  height: 8px;
+  width: 10px;
+  height: 10px;
   border-radius: 50%;
-  background: var(--text-faint);
+  background: #f4f2ee;
   transition: transform var(--t-fast) var(--ease), background var(--t-fast) var(--ease);
 }
 
 .row[aria-checked='true'] .pill {
-  border-color: var(--c);
-  background: color-mix(in srgb, var(--c) 18%, transparent);
+  background: var(--c);
 }
 
 .row[aria-checked='true'] .pill::after {
   transform: translateX(12px);
-  background: var(--c);
+  background: var(--knob);
 }
 
 .name {

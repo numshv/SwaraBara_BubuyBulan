@@ -49,4 +49,4 @@ Applies on top of `.scratch/wildfire-sonification-mockup/grill-summary.md` and `
 
 ## Outcome (after comparison)
 - Chosen: **b (two lines)** for every row; right column narrowed to 240px (220px on tablet).
-- Per-layer colour on meter fill and switch knob: Wildfire coral `#ff6a3d`, Aerosol smoke `#c4bcb0`, El Niño teal `#4fd1c5`, CO₂ cream `#fff0cd`, CO amber `#ffc86e`, Rain blue `#5aa9ff`.
+- Per-layer colour on meter fill and switch knob (project palette): Wildfire `#de4a3d`, Aerosol off-white `#e8e4dc`, El Niño `#efcd57`, CO₂ `#349800`, CO `#924fbf`, Rain `#5a4fbf`.

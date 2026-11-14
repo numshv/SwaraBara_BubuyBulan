@@ -14,20 +14,26 @@ interface LayerDef {
   name: string
   /** Placeholder gamelan voice until the sound mapping is decided. */
   instrument: string
-  /** Meter and switch colour: map / fire palette, plus teal and blue for ocean and water. */
+  /** Meter and switch colour, from the project palette; aerosol stays an off-white like smoke. */
   color: string
 }
 
 export const LAYERS: LayerDef[] = [
-  { id: 'wildfire', name: 'Wildfire', instrument: 'Bonang', color: '#ff6a3d' },
-  { id: 'aerosol', name: 'Aerosol', instrument: 'Gong ageng', color: '#c4bcb0' },
-  { id: 'elnino', name: 'El Niño', instrument: 'Kendang', color: '#4fd1c5' },
-  { id: 'co2', name: 'CO₂', instrument: 'Gender', color: '#fff0cd' },
-  { id: 'co', name: 'CO', instrument: 'Saron', color: '#ffc86e' },
-  { id: 'rain', name: 'Rain', instrument: 'Suling', color: '#5aa9ff' },
+  { id: 'wildfire', name: 'Wildfire', instrument: 'Bonang', color: '#de4a3d' },
+  { id: 'aerosol', name: 'Aerosol', instrument: 'Gong ageng', color: '#e8e4dc' },
+  { id: 'elnino', name: 'El Niño', instrument: 'Kendang', color: '#efcd57' },
+  { id: 'co2', name: 'CO₂', instrument: 'Gender', color: '#349800' },
+  { id: 'co', name: 'CO', instrument: 'Saron', color: '#924fbf' },
+  { id: 'rain', name: 'Rain', instrument: 'Suling', color: '#5a4fbf' },
 ]
 
 export const LAYER_NAMES = Object.fromEntries(LAYERS.map((l) => [l.id, l.name])) as Record<LayerId, string>
+
+/** White knob on dark tracks, dark knob on light ones (off-white aerosol, yellow El Niño). */
+function knobFor(hex: string): string {
+  const [r, g, b] = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16) / 255)
+  return 0.2126 * r + 0.7152 * g + 0.0722 * b > 0.55 ? '#161616' : '#ffffff'
+}
 
 /** Decay times in months: fire hits fade fast, rain bursts a little faster. */
 const FIRE_TAU = 0.05
@@ -118,7 +124,7 @@ export function SoundLayers({ layers, frames, aerosolPeaks, climate, t, playing,
                 role="switch"
                 aria-checked={on}
                 className={styles.row}
-                style={{ '--c': color } as CSSProperties}
+                style={{ '--c': color, '--knob': knobFor(color) } as CSSProperties}
                 onClick={() => onToggle(id)}
                 aria-label={`${name}, played by ${instrument.toLowerCase()}`}
                 aria-describedby={`layer-${id}-value`}

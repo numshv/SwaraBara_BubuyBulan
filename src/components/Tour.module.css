@@ -1,0 +1,81 @@
+.layer {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  animation: fade-in var(--t-base) var(--ease) backwards;
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
+.spot {
+  position: fixed;
+  border-radius: 6px;
+  box-shadow: 0 0 0 9999px rgba(10, 10, 10, 0.72);
+  transition: top var(--t-base) var(--ease), left var(--t-base) var(--ease), width var(--t-base) var(--ease),
+    height var(--t-base) var(--ease);
+  pointer-events: none;
+}
+
+.box {
+  position: fixed;
+  display: grid;
+  gap: 8px;
+  padding: 18px 20px;
+  background: #1f1f1f;
+  border-radius: 6px;
+  transition: top var(--t-base) var(--ease), left var(--t-base) var(--ease);
+}
+
+.count {
+  margin: 0;
+}
+
+.title {
+  font-size: 1.1rem;
+}
+
+.text {
+  margin: 0;
+  font-size: 0.88rem;
+  color: var(--text-dim);
+}
+
+.dots {
+  display: flex;
+  gap: 6px;
+}
+
+.dots span {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--rule-strong);
+}
+
+.dots span[data-on] {
+  background: var(--accent);
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.spacer {
+  flex: 1;
+}
+
+.actions :global(.btn) {
+  padding: 7px 14px;
+  font-size: 0.82rem;
+}
+
+.box:focus {
+  outline: none;
+}

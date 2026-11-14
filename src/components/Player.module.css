@@ -1,0 +1,153 @@
+/* Everything centred on one axis: now playing, transport, timeline. */
+.player {
+  display: grid;
+  justify-items: center;
+  gap: 10px;
+  width: 100%;
+}
+
+.nowPlaying {
+  margin: 0;
+  max-width: 100%;
+  font-size: 0.85rem;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* The one all-caps label in the interface. */
+.caps {
+  font-size: 0.7rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+}
+
+.song[data-holding] {
+  color: var(--accent);
+}
+
+.buttons {
+  display: grid;
+  grid-template-columns: 36px 40px 36px;
+  align-items: center;
+  justify-items: center;
+  gap: 8px;
+}
+
+.play {
+  display: inline-grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  padding: 0 0 0 1px;
+  border-radius: 50%;
+  border: 1px solid var(--rule-strong);
+  background: transparent;
+  color: var(--text);
+  transition: border-color 150ms ease;
+}
+
+.play:hover {
+  border-color: var(--text);
+}
+
+/* Elapsed · timeline · total, kept short and centred under the buttons. */
+.timeline {
+  display: grid;
+  grid-template-columns: 2.6em minmax(0, 1fr) 2.6em;
+  align-items: start;
+  gap: 12px;
+  width: min(100%, 480px);
+}
+
+.time {
+  font-size: 0.72rem;
+  line-height: 16px;
+  color: var(--text-faint);
+  font-variant-numeric: tabular-nums;
+}
+
+.time:last-child {
+  text-align: right;
+}
+
+.track {
+  position: relative;
+  padding-bottom: 18px;
+}
+
+.range {
+  display: block;
+  width: 100%;
+  margin: 0;
+  appearance: none;
+  background: transparent;
+  height: 16px;
+}
+
+.range::-webkit-slider-runnable-track {
+  height: 1px;
+  background: linear-gradient(90deg, var(--text) var(--pct), var(--rule-strong) var(--pct));
+}
+
+.range::-moz-range-track {
+  height: 1px;
+  background: linear-gradient(90deg, var(--text) var(--pct), var(--rule-strong) var(--pct));
+}
+
+.range::-webkit-slider-thumb {
+  appearance: none;
+  width: 9px;
+  height: 9px;
+  margin-top: -4px;
+  border-radius: 50%;
+  background: var(--accent);
+}
+
+.range::-moz-range-thumb {
+  width: 9px;
+  height: 9px;
+  border: 0;
+  border-radius: 50%;
+  background: var(--accent);
+}
+
+/* Inset by half the thumb so markers and labels line up with the thumb's travel. */
+.markers,
+.years {
+  position: absolute;
+  left: 4.5px;
+  right: 4.5px;
+  pointer-events: none;
+}
+
+.markers {
+  top: 6.5px;
+  height: 3px;
+}
+
+.marker {
+  position: absolute;
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: var(--text-faint);
+  transform: translateX(-1.5px);
+  pointer-events: auto;
+}
+
+.years {
+  bottom: 0;
+  height: 12px;
+}
+
+.years span {
+  position: absolute;
+  font-size: 0.66rem;
+  line-height: 1;
+  color: var(--text-faint);
+  transform: translateX(-50%);
+}

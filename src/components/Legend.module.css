@@ -1,0 +1,90 @@
+.legend {
+  display: grid;
+  gap: 10px;
+  font-size: 0.72rem;
+  color: var(--text-faint);
+}
+
+/* Radiative power on top, brightness stacked right below it. */
+.row {
+  display: grid;
+  justify-items: start;
+  gap: 14px;
+}
+
+.scale {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+}
+
+.scale figcaption {
+  color: var(--text-dim);
+}
+
+.ramp {
+  display: flex;
+  width: 220px;
+  height: 8px;
+}
+
+.ramp span {
+  flex: 1;
+}
+
+/* Hairline separators between steps, like the stepped scales in the references. */
+.ramp span + span {
+  border-left: 1px solid var(--bg);
+}
+
+.ticks {
+  position: relative;
+  width: 220px;
+  height: 12px;
+}
+
+.ticks span {
+  position: absolute;
+  transform: translateX(-50%);
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+/* End labels align inward so they don't poke past the bar. */
+.ticks span:first-child {
+  transform: none;
+}
+
+.ticks span:last-child {
+  transform: translateX(-100%);
+}
+
+.sizes {
+  display: flex;
+  align-items: flex-end;
+  gap: 14px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.sizes li {
+  display: grid;
+  justify-items: center;
+  gap: 4px;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+/* Fixed-height box so labels line up whatever the dot size. */
+.dotBox {
+  display: grid;
+  place-items: center;
+  height: 22px;
+}
+
+.dot {
+  border-radius: 50%;
+  background: #ffb45a;
+  box-shadow: 0 0 6px rgba(255, 106, 61, 0.7);
+}

@@ -1,0 +1,108 @@
+.map {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-height: 280px;
+  overflow: hidden;
+}
+
+.svg,
+.fires {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.fires {
+  pointer-events: none;
+  transition: opacity 400ms ease;
+}
+
+.neighbour {
+  fill: var(--neighbour);
+  stroke: none;
+}
+
+.region path {
+  fill: var(--land);
+  stroke: #2e2e2e;
+  stroke-width: 0.5;
+  transition: fill 200ms ease, stroke 200ms ease, opacity 300ms ease;
+}
+
+.region[data-clickable] {
+  cursor: pointer;
+}
+
+.region[data-active] path {
+  fill: var(--land-active);
+  stroke: #8a8a8a;
+  stroke-width: 0.8;
+}
+
+.region[data-dim] path {
+  opacity: 0.45;
+}
+
+.labels,
+.provinceLabels {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  animation: fade-in var(--t-base) var(--ease) 400ms backwards;
+}
+
+.provinceLabels {
+  animation-delay: 650ms;
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
+.label {
+  pointer-events: auto;
+  position: absolute;
+  transform: translate(-50%, -50%);
+  padding: 4px 6px;
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: var(--text-dim);
+  background: none;
+  border: 0;
+  white-space: nowrap;
+  text-shadow: 0 0 6px var(--bg), 0 0 12px var(--bg);
+  transition: color 150ms ease;
+}
+
+.label:hover,
+.label[data-active] {
+  color: var(--text);
+}
+
+.provinceLabels span {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  font-size: 0.7rem;
+  color: var(--text-faint);
+  text-align: center;
+  max-width: 9em;
+  line-height: 1.2;
+  text-shadow: 0 0 6px var(--bg), 0 0 12px var(--bg);
+}
+
+.date {
+  position: absolute;
+  right: 4px;
+  bottom: 0;
+  margin: 0;
+  font-size: clamp(1.3rem, 2.4vw, 2rem);
+  font-weight: 300;
+  letter-spacing: -0.01em;
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+  pointer-events: none;
+}

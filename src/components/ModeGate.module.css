@@ -1,0 +1,84 @@
+.gate {
+  min-height: 100%;
+  display: grid;
+  align-content: end;
+  padding: 48px 32px 64px;
+  background: var(--bg);
+  animation: fade-in var(--t-slow) var(--ease) backwards;
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
+.inner {
+  max-width: 760px;
+  display: grid;
+  gap: 20px;
+}
+
+.kicker {
+  margin: 0;
+}
+
+.title {
+  font-size: clamp(2rem, 4.6vw, 3.4rem);
+  font-weight: 500;
+  line-height: 1.08;
+  letter-spacing: -0.02em;
+}
+
+.lead {
+  margin: 12px 0 0;
+  color: var(--text-dim);
+}
+
+.choices {
+  display: grid;
+  border-top: 1px solid var(--rule);
+}
+
+/* Each option is a full-width text row with a hairline rule, not a card. */
+.choice {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 4px 24px;
+  padding: 20px 0;
+  text-align: left;
+  background: none;
+  border: 0;
+  border-bottom: 1px solid var(--rule);
+}
+
+.choice::after {
+  content: '→';
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  align-self: center;
+  color: var(--text-faint);
+  transition: color 150ms ease, transform 150ms ease;
+}
+
+.choice:hover::after,
+.choice:focus-visible::after {
+  color: var(--accent);
+  transform: translateX(4px);
+}
+
+.choiceTitle {
+  font-size: 1.15rem;
+  font-weight: 500;
+}
+
+.choiceText {
+  font-size: 0.88rem;
+  color: var(--text-dim);
+}
+
+.note {
+  margin: 0;
+  font-size: 0.8rem;
+  color: var(--text-faint);
+}

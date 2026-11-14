@@ -1,0 +1,204 @@
+/* Visual direction: .scratch/inspo-2.jpg (flat charcoal, one sans, one coral accent, hairline rules). */
+:root {
+  --bg: #161616;
+  --sea: #161616;
+  --land: #222222;
+  --land-active: #2a2a2a;
+  --neighbour: #1b1b1b;
+  --rule: #333333;
+  --rule-strong: #5c5c5c;
+  --text: #f0eeea;
+  --text-dim: #a8a6a1;
+  --text-faint: #8a8883;
+  --accent: #ff6a3d;
+  --font: 'Inter', system-ui, sans-serif;
+  /* One easing and a few durations for every appear / disappear. */
+  --ease: cubic-bezier(0.22, 0.61, 0.36, 1);
+  --t-fast: 220ms;
+  --t-base: 450ms;
+  --t-slow: 700ms;
+  color-scheme: dark;
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+
+/* Re-keyed content (new chapter, new title) eases in instead of snapping. */
+.appear {
+  animation: rise-in var(--t-base) var(--ease) backwards;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font: 400 15px/1.5 var(--font);
+  -webkit-font-smoothing: antialiased;
+}
+
+button,
+input {
+  font: inherit;
+  color: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
+h1,
+h2,
+h3 {
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  margin: 0;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Small quiet label. Sentence case: the only all-caps text is the player's "NOW PLAYING". */
+.eyebrow {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--text-faint);
+}
+
+/* Text-style button: the default control in this design. */
+.link {
+  padding: 4px 0;
+  text-decoration: none;
+  background: none;
+  border: 0;
+  color: var(--text-dim);
+  font-size: 0.85rem;
+  transition: color 150ms ease;
+}
+
+.link:hover {
+  color: var(--text);
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 9px 18px;
+  font-size: 0.88rem;
+  font-weight: 500;
+  background: transparent;
+  border: 1px solid var(--rule-strong);
+  border-radius: 999px;
+  transition: border-color 150ms ease, color 150ms ease;
+}
+
+.btn:hover {
+  border-color: var(--text);
+}
+
+.btn-primary {
+  background: var(--text);
+  border-color: var(--text);
+  color: var(--bg);
+}
+
+.btn-primary:hover {
+  background: #fff;
+}
+
+.icon-btn {
+  display: inline-grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  background: transparent;
+  border: 0;
+  border-radius: 50%;
+  color: var(--text-dim);
+  transition: color 150ms ease;
+}
+
+.icon-btn:hover {
+  color: var(--text);
+}
+
+dialog {
+  color: var(--text);
+  background: #1d1d1d;
+  border: 0;
+  border-radius: 6px;
+  padding: 0;
+  max-width: min(600px, calc(100vw - 32px));
+  max-height: calc(100vh - 48px);
+}
+
+dialog::backdrop {
+  background: rgba(0, 0, 0, 0.6);
+}
+
+dialog[open] {
+  animation: rise-in var(--t-fast) var(--ease);
+}
+
+dialog[open]::backdrop {
+  animation: fade-in var(--t-fast) var(--ease);
+}
+
+kbd {
+  display: inline-block;
+  min-width: 1.6em;
+  padding: 0 6px;
+  font: 500 0.78rem/1.6 var(--font);
+  text-align: center;
+  border: 1px solid var(--rule-strong);
+  border-radius: 4px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

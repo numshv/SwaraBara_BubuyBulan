@@ -1,0 +1,49 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  display: grid;
+  place-content: center;
+  justify-items: start;
+  gap: 32px;
+  padding: 32px;
+  background: rgba(22, 22, 22, 0.6);
+  animation: fade var(--t-slow) var(--ease) backwards;
+  transition: opacity var(--t-base) var(--ease);
+}
+
+.overlay[data-leaving] {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.kicker {
+  font-size: 0.72rem;
+}
+
+.counters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 32px 64px;
+}
+
+.closing {
+  margin: 0;
+  max-width: 30em;
+  font-size: clamp(1.05rem, 1.8vw, 1.35rem);
+  line-height: 1.4;
+  color: var(--text);
+  animation: fade var(--t-slow) var(--ease) 900ms backwards;
+}
+
+.actions {
+  display: flex;
+  gap: 12px;
+  animation: fade var(--t-base) var(--ease) 1200ms backwards;
+}
+
+@keyframes fade {
+  from {
+    opacity: 0;
+  }
+}

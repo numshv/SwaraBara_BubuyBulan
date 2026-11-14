@@ -1,0 +1,99 @@
+.fieldset {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.fieldset legend {
+  padding: 0 0 8px;
+  font-size: 0.72rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  color: var(--text-dim);
+}
+
+.radio {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  cursor: pointer;
+}
+
+.radio input {
+  accent-color: var(--accent);
+  width: 18px;
+  height: 18px;
+}
+
+.switchRow {
+  display: grid;
+  gap: 4px;
+}
+
+.switchRow[data-disabled] {
+  opacity: 0.55;
+}
+
+.switch {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0;
+  background: none;
+  border: 0;
+  font-weight: 500;
+  justify-self: start;
+}
+
+.switch:disabled {
+  cursor: not-allowed;
+}
+
+.switch span {
+  position: relative;
+  width: 36px;
+  height: 20px;
+  border-radius: 10px;
+  border: 1px solid var(--rule-strong);
+  background: #1b1b1e;
+}
+
+.switch span::after {
+  content: '';
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--text-faint);
+  transition: transform 150ms ease;
+}
+
+.switch[aria-checked='true'] span {
+  background: rgba(255, 122, 26, 0.3);
+  border-color: var(--accent);
+}
+
+.switch[aria-checked='true'] span::after {
+  transform: translateX(16px);
+  background: var(--accent);
+}
+
+.note {
+  margin: 0;
+  font-size: 0.82rem;
+  color: var(--text-dim);
+}
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.sub {
+  font-size: 1.1rem;
+}

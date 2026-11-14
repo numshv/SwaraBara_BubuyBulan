@@ -1,0 +1,21 @@
+.body {
+  display: grid;
+  gap: 16px;
+  padding: 20px 24px 24px;
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.head h2 {
+  font-size: 1.2rem;
+}
+
+.wide {
+  max-width: min(920px, calc(100vw - 32px));
+  width: 100%;
+}

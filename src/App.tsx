@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useReducer, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react'
 import { AnnouncerProvider, useAnnounce } from './a11y/Announcer'
 import { readingSeconds, speak, stopSpeaking } from './a11y/speech'
 import { REPO_URL } from './config'
@@ -11,6 +11,7 @@ import { NarrationPanel } from './components/NarrationPanel'
 import { Player } from './components/Player'
 import { LAYER_NAMES, SoundLayers, type LayerId, type Layers } from './components/SoundLayers'
 import { INTRO_STEPS, PLAY_STEPS, Tour } from './components/Tour'
+import { describeHaze, getAerosol, type AerosolField } from './data/aerosol'
 import { cumulativeAt, getSongs, type SongData } from './data/generate'
 import { CUES, INTRO_TEXT, cueIndexAt, type Cue } from './data/narration'
 import { REGIONS, REGION_BY_ID, songName, songTitle, type RegionId, type SongId } from './data/regions'
@@ -32,10 +33,11 @@ export default function App() {
 type Stage = 'intro' | 'play'
 type DialogId = 'settings' | 'help'
 
-function monthSummary(song: SongData, frame: number): string {
+function monthSummary(song: SongData, aerosol: AerosolField, frame: number): string {
   const f = song.frames[clampFrame(frame)]
   const where = f.topProvince ? `, most in ${f.topProvince}` : ''
-  return `${frameLabel(frame)}: ${formatNumber(f.detections)} fire spots${where}.`
+  const haze = describeHaze(aerosol.peaks[song.id][clampFrame(frame)])
+  return `${frameLabel(frame)}: ${formatNumber(f.detections)} fire spots${where}. ${haze}.`
 }
 
 function Experience({ prefs, update }: { prefs: Prefs; update: (p: Partial<Prefs>) => void }) {
@@ -46,7 +48,7 @@ function Experience({ prefs, update }: { prefs: Prefs; update: (p: Partial<Prefs
   const [songs, setSongs] = useState<Record<SongId, SongData> | null>(null)
   const [song, setSong] = useState<SongId>('indonesia')
   const [clock, dispatch] = useReducer(clockReducer, initialClock)
-  const [layers, setLayers] = useState<Layers>({ wildfire: true, co: true, pm25: true })
+  const [layers, setLayers] = useState<Layers>({ wildfire: true, aerosol: true, co: true, pm25: true })
   const [unlocked, setUnlocked] = useState(false)
   const [tour, setTour] = useState<Stage | null>(null)
   const [dialog, setDialog] = useState<DialogId | null>(null)
@@ -74,6 +76,8 @@ function Experience({ prefs, update }: { prefs: Prefs; update: (p: Partial<Prefs
   const cueIdx = cueIndexAt(cues, clock.t)
   const data = songs?.[song]
   const frame = data?.frames[clampFrame(clock.t)]
+  // The haze field is national; island views read the same grid, zoomed in.
+  const aerosol = useMemo(() => (songs ? getAerosol(songs.indonesia.frames) : null), [songs])
 
   // Playback loop.
   const running = clock.playing && !holding && !tour
@@ -122,7 +126,7 @@ function Experience({ prefs, update }: { prefs: Prefs; update: (p: Partial<Prefs
   // Audio mode: spoken map summary every January and at seasonal peaks.
   const month = clampFrame(clock.t)
   useEffect(() => {
-    if (!audioMode || !clock.playing || !data || lastMonth.current === month) return
+    if (!audioMode || !clock.playing || !data || !aerosol || lastMonth.current === month) return
     lastMonth.current = month
     if (cues.some((c) => c.frame === month)) return
     const d = data.frames
@@ -131,8 +135,8 @@ function Experience({ prefs, update }: { prefs: Prefs; update: (p: Partial<Prefs
       d[month].detections >= 0.5 * peak &&
       d[month].detections >= (d[month - 1]?.detections ?? 0) &&
       d[month].detections >= (d[month + 1]?.detections ?? 0)
-    if (frameMonth(month) === 0 || isPeak) announce(monthSummary(data, month))
-  }, [audioMode, clock.playing, month, data, cues, announce])
+    if (frameMonth(month) === 0 || isPeak) announce(monthSummary(data, aerosol, month))
+  }, [audioMode, clock.playing, month, data, aerosol, cues, announce])
 
   // Song end.
   useEffect(() => {
@@ -207,7 +211,7 @@ function Experience({ prefs, update }: { prefs: Prefs; update: (p: Partial<Prefs
     releaseHold()
     const t = Math.min(Math.max(Math.floor(clock.t) + months, 0), MONTH_COUNT - 1)
     dispatch({ type: 'step', months })
-    if (data) announce(monthSummary(data, t))
+    if (data && aerosol) announce(monthSummary(data, aerosol, t))
   }
 
   // Narrates the chapter landed on, immediately if playing, otherwise once playback resumes.
@@ -247,10 +251,13 @@ function Experience({ prefs, update }: { prefs: Prefs; update: (p: Partial<Prefs
   }
 
   function exploreRegion(id: RegionId) {
-    if (!songs) return
+    if (!songs || !aerosol) return
     const f = songs[id].frames[clampFrame(clock.t)]
     const peak = f.peakFrp ? `, strongest fire ${Math.round(f.peakFrp)} megawatts` : ''
-    announce(`${REGION_BY_ID[id].name}, ${frameLabel(clock.t)}: ${formatNumber(f.detections)} fire spots${peak}. Press Enter to open.`)
+    const haze = describeHaze(aerosol.peaks[id][clampFrame(clock.t)])
+    announce(
+      `${REGION_BY_ID[id].name}, ${frameLabel(clock.t)}: ${formatNumber(f.detections)} fire spots${peak}. ${haze}. Press Enter to open.`,
+    )
   }
 
   function toggleLayer(id: LayerId) {
@@ -304,7 +311,7 @@ function Experience({ prefs, update }: { prefs: Prefs; update: (p: Partial<Prefs
     return () => window.removeEventListener('keydown', onKey)
   }, [])
 
-  if (!songs || !data || !frame) {
+  if (!songs || !data || !frame || !aerosol) {
     return (
       <div className={styles.loading} role="status">
         Preparing eight years of fire data…
@@ -379,6 +386,8 @@ function Experience({ prefs, update }: { prefs: Prefs; update: (p: Partial<Prefs
             t={clock.t}
             dateLabel={frameLabel(clock.t)}
             wildfireOn={layers.wildfire}
+            aerosol={aerosol}
+            smokeOn={layers.aerosol}
             reducedMotion={reducedMotion}
             onOpenRegion={openRegion}
             onExploreRegion={exploreRegion}
@@ -399,7 +408,7 @@ function Experience({ prefs, update }: { prefs: Prefs; update: (p: Partial<Prefs
         />
         <div className={styles.bottomSide}>
           {unlocked && (
-            <SoundLayers layers={layers} frame={frame} onToggle={toggleLayer} />
+            <SoundLayers layers={layers} frame={frame} aod={aerosol.peaks[song][clampFrame(clock.t)].aod} onToggle={toggleLayer} />
           )}
         </div>
       </footer>

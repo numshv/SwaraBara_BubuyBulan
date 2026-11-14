@@ -1,21 +1,25 @@
 import type { FrameData } from '../data/generate'
 import styles from './SoundLayers.module.css'
 
-export type LayerId = 'wildfire' | 'co' | 'pm25'
+export type LayerId = 'wildfire' | 'aerosol' | 'co' | 'pm25'
 export type Layers = Record<LayerId, boolean>
 
 interface Props {
   layers: Layers
   frame: FrameData
+  /** Peak aerosol optical depth in view this month. */
+  aod: number
   onToggle: (id: LayerId) => void
 }
 
-export const LAYER_NAMES: Record<LayerId, string> = { wildfire: 'Wildfire', co: 'CO', pm25: 'PM2.5' }
+export const LAYER_NAMES: Record<LayerId, string> = { wildfire: 'Wildfire', aerosol: 'Aerosol', co: 'CO', pm25: 'PM2.5' }
 
-function readout(id: LayerId, f: FrameData): string {
+function readout(id: LayerId, f: FrameData, aod: number): string {
   switch (id) {
     case 'wildfire':
       return `${f.detections.toLocaleString('en-US')} spots`
+    case 'aerosol':
+      return `AOD ${aod.toFixed(2)}`
     case 'co':
       return `${f.co} ppb`
     case 'pm25':
@@ -23,7 +27,7 @@ function readout(id: LayerId, f: FrameData): string {
   }
 }
 
-export function SoundLayers({ layers, frame, onToggle }: Props) {
+export function SoundLayers({ layers, frame, aod, onToggle }: Props) {
   return (
     <section className={styles.layers} aria-labelledby="layers-heading" data-tour="layers">
       <h2 id="layers-heading" className="eyebrow">
@@ -46,7 +50,7 @@ export function SoundLayers({ layers, frame, onToggle }: Props) {
                 <span className={styles.dot} aria-hidden="true" />
                 <span className={styles.name}>{LAYER_NAMES[id]}</span>
                 <span className={styles.value} id={`layer-${id}-value`}>
-                  {on ? readout(id, frame) : 'muted'}
+                  {on ? readout(id, frame, aod) : 'muted'}
                 </span>
               </button>
             </li>

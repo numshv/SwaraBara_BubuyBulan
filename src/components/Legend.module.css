@@ -1,15 +1,17 @@
+/* Aerosol on top; fire brightness with radiative power to its right underneath. */
 .legend {
   display: grid;
-  gap: 10px;
+  justify-items: start;
+  gap: 14px;
   font-size: 0.72rem;
   color: var(--text-faint);
 }
 
-/* Radiative power on top, brightness stacked right below it. */
-.row {
-  display: grid;
-  justify-items: start;
-  gap: 14px;
+.fire {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 14px 28px;
 }
 
 .scale {
@@ -37,9 +39,17 @@
   border-left: 1px solid var(--bg);
 }
 
+/* Continuous, like the smoke itself: clear → warm grey haze. */
+.haze {
+  width: 220px;
+  height: 8px;
+  background: linear-gradient(90deg, rgba(196, 188, 176, 0.04), rgba(196, 188, 176, 0.55));
+}
+
+/* Spans its figure, which is as wide as the bar above it. */
 .ticks {
   position: relative;
-  width: 220px;
+  width: 100%;
   height: 12px;
 }
 

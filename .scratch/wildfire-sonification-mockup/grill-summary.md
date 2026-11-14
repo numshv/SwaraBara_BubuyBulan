@@ -83,3 +83,11 @@ Goal: a dummy, interactable frontend mockup (in `src/`) of the wildfire data-son
 
 ## Out of scope
 - Real data, any audio/sonification, backend/API/accounts/analytics, non-English languages, real photos, deployment.
+
+## Aerosol smoke layer (added 2026-11-15)
+- Map shows fire + aerosol only. El Niño / rain are timeline candidates; CO / CO₂ stay sound-only (not yet built).
+- Dummy AOD shaped like MERRA-2 monthly means (`M2TMNXAER` TOTEXTTAU): 0.625° × 0.5° grid, lon 94–142, lat −12–8 (`src/data/aerosol.ts`). Deposited downwind of each month's fire dots, 25% carry-over, peak ≈ 3.1 (Sep 2019), background 0.12.
+- Monthly low-level wind per calendar month: dry season pushes smoke NW (towards Malaysia/Singapore), wet monsoon SE. Swap for MERRA-2 U850/V850 later.
+- Rendering (`src/map/smokeLayer.ts`): blurred AOD raster (extent; reduced-motion fallback) + up to 1,200 billowy puffs spawned where AOD > 0.35, drifting with the wind plus a slow curl, growing and fading over 5–9 s. Keeps drifting while paused. Thinned when zoomed in.
+- "Aerosol" sound-layer switch (AOD readout) also shows / hides the smoke. Legend: "Aerosol optical depth" 0–3+ in a second column beside the fire scales.
+- Audio mode: monthly summaries and region exploration add e.g. "Thick haze over Riau, AOD 3.1".

@@ -39,7 +39,7 @@ export const PLAY_STEPS: TourStep[] = [
   {
     target: '[data-tour="layers"]',
     title: 'Sound layers',
-    text: 'Each data set is one layer of the music: wildfire, carbon monoxide and fine particles. Switch them on or off to hear them separately.',
+    text: 'Each data set is one layer of the music: wildfire, aerosol smoke, carbon monoxide and fine particles. Switch them on or off to hear them separately; Wildfire and Aerosol also show or hide their layer on the map.',
   },
   {
     target: '[data-tour="legend"]',

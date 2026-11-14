@@ -51,8 +51,6 @@ export interface FrameData {
   ari: number
   /** Carbon monoxide, ppb. */
   co: number
-  /** Fine particulate matter, µg/m³. */
-  pm25: number
   peakFrp: number
   topProvince: string | null
   dots: FireDot[]
@@ -195,7 +193,6 @@ function buildSong(id: SongId, series: Record<RegionId, RegionSeries>, nationalB
       hectares: HECTARES_PER_YEAR[year] * share,
       ari: ARI_PER_YEAR[year] * share,
       co: Math.round(110 + 780 * level + rand() * 25),
-      pm25: Math.round(12 + 290 * Math.pow(detections / peak, 0.75) + rand() * 6),
       peakFrp: dots.reduce((m, d) => Math.max(m, d.frp), 0),
       topProvince,
       dots,

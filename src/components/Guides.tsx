@@ -64,7 +64,7 @@ export function AudioGuide({ stage, onDone }: { stage: 'intro' | 'play'; onDone:
               early, or N to hear it again.
             </li>
             <li>Impact counters: people treated for respiratory infections, and hectares of land burned.</li>
-            <li>Sound layers: Wildfire, Aerosol, CO and PM2.5 switches, each with its current value.</li>
+            <li>Sound layers: Wildfire, Aerosol, El Niño, CO₂, CO and Rain switches. Each says which gamelan instrument plays it and its value this month.</li>
             <li>A legend that explains the fire dots on the map.</li>
           </ol>
         </>

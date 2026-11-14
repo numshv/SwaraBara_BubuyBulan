@@ -12,6 +12,7 @@ import { Player } from './components/Player'
 import { LAYER_NAMES, SoundLayers, type LayerId, type Layers } from './components/SoundLayers'
 import { INTRO_STEPS, PLAY_STEPS, Tour } from './components/Tour'
 import { describeHaze, getAerosol, type AerosolField } from './data/aerosol'
+import { getClimate } from './data/climate'
 import { cumulativeAt, getSongs, type SongData } from './data/generate'
 import { CUES, INTRO_TEXT, cueIndexAt, type Cue } from './data/narration'
 import { REGIONS, REGION_BY_ID, songName, songTitle, type RegionId, type SongId } from './data/regions'
@@ -48,7 +49,7 @@ function Experience({ prefs, update }: { prefs: Prefs; update: (p: Partial<Prefs
   const [songs, setSongs] = useState<Record<SongId, SongData> | null>(null)
   const [song, setSong] = useState<SongId>('indonesia')
   const [clock, dispatch] = useReducer(clockReducer, initialClock)
-  const [layers, setLayers] = useState<Layers>({ wildfire: true, aerosol: true, co: true, pm25: true })
+  const [layers, setLayers] = useState<Layers>({ wildfire: true, aerosol: true, elnino: true, co2: true, co: true, rain: true })
   const [unlocked, setUnlocked] = useState(false)
   const [tour, setTour] = useState<Stage | null>(null)
   const [dialog, setDialog] = useState<DialogId | null>(null)
@@ -78,6 +79,7 @@ function Experience({ prefs, update }: { prefs: Prefs; update: (p: Partial<Prefs
   const frame = data?.frames[clampFrame(clock.t)]
   // The haze field is national; island views read the same grid, zoomed in.
   const aerosol = useMemo(() => (songs ? getAerosol(songs.indonesia.frames) : null), [songs])
+  const climate = getClimate()
 
   // Playback loop.
   const running = clock.playing && !holding && !tour
@@ -384,7 +386,6 @@ function Experience({ prefs, update }: { prefs: Prefs; update: (p: Partial<Prefs
             song={song}
             frames={data.frames}
             t={clock.t}
-            dateLabel={frameLabel(clock.t)}
             wildfireOn={layers.wildfire}
             aerosol={aerosol}
             smokeOn={layers.aerosol}
@@ -393,6 +394,26 @@ function Experience({ prefs, update }: { prefs: Prefs; update: (p: Partial<Prefs
             onExploreRegion={exploreRegion}
           />
         </section>
+        {/* Top-right: the month first, sound-layer switches beneath it. */}
+        <div className={styles.side}>
+          <p className={styles.date} aria-hidden="true">
+            {frameLabel(clock.t)}
+          </p>
+          {unlocked && (
+            <div className={styles.sideLayers}>
+              <SoundLayers
+                layers={layers}
+                frames={data.frames}
+                aerosolPeaks={aerosol.peaks[song]}
+                climate={climate}
+                t={clock.t}
+                playing={running}
+                reducedMotion={reducedMotion}
+                onToggle={toggleLayer}
+              />
+            </div>
+          )}
+        </div>
       </main>
 
       <footer className={styles.bottom}>
@@ -406,11 +427,8 @@ function Experience({ prefs, update }: { prefs: Prefs; update: (p: Partial<Prefs
           onSeek={seek}
           onChapter={chapter}
         />
-        <div className={styles.bottomSide}>
-          {unlocked && (
-            <SoundLayers layers={layers} frame={frame} aod={aerosol.peaks[song][clampFrame(clock.t)].aod} onToggle={toggleLayer} />
-          )}
-        </div>
+        {/* Empty, keeps the side columns equal so the player stays centred. */}
+        <div className={styles.bottomSide} />
       </footer>
 
       {showEnd && (

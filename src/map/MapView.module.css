@@ -95,16 +95,3 @@
   line-height: 1.2;
   text-shadow: 0 0 6px var(--bg), 0 0 12px var(--bg);
 }
-
-.date {
-  position: absolute;
-  right: 4px;
-  bottom: 0;
-  margin: 0;
-  font-size: clamp(1.3rem, 2.4vw, 2rem);
-  font-weight: 300;
-  letter-spacing: -0.01em;
-  color: var(--text);
-  font-variant-numeric: tabular-nums;
-  pointer-events: none;
-}

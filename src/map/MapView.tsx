@@ -13,7 +13,6 @@ interface Props {
   song: SongId
   frames: FrameData[]
   t: number
-  dateLabel: string
   wildfireOn: boolean
   aerosol: AerosolField
   smokeOn: boolean
@@ -31,7 +30,7 @@ const provinceCentroids = provinces.map((p) => ({
 }))
 
 export function MapView({
-  song, frames, t, dateLabel, wildfireOn, aerosol, smokeOn, reducedMotion, onOpenRegion, onExploreRegion,
+  song, frames, t, wildfireOn, aerosol, smokeOn, reducedMotion, onOpenRegion, onExploreRegion,
 }: Props) {
   const boxRef = useRef<HTMLDivElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
@@ -176,9 +175,6 @@ export function MapView({
         </div>
       )}
 
-      <p className={styles.date} aria-hidden="true">
-        {dateLabel}
-      </p>
     </div>
   )
 }

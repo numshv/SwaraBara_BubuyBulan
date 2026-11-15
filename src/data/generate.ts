@@ -49,8 +49,6 @@ export interface FrameData {
   detections: number
   hectares: number
   ari: number
-  /** Carbon monoxide, ppb. */
-  co: number
   peakFrp: number
   topProvince: string | null
   dots: FireDot[]
@@ -164,9 +162,8 @@ function cumulative(values: number[]): number[] {
   return out
 }
 
-function buildSong(id: SongId, series: Record<RegionId, RegionSeries>, nationalByYear: Record<number, number>, peak: number): SongData {
+function buildSong(id: SongId, series: Record<RegionId, RegionSeries>, nationalByYear: Record<number, number>): SongData {
   const regions = id === 'indonesia' ? REGIONS.map((r) => r.id) : [id]
-  const rand = mulberry32(id.length * 7919 + 17)
   const frames: FrameData[] = []
   const yearDetections: Record<number, number> = {}
 
@@ -182,7 +179,6 @@ function buildSong(id: SongId, series: Record<RegionId, RegionSeries>, nationalB
     yearDetections[year] = (yearDetections[year] ?? 0) + detections
 
     const share = detections / nationalByYear[year]
-    const level = Math.pow(detections / peak, 0.6)
     const byProvince = new Map<string, number>()
     for (const d of dots) byProvince.set(d.province, (byProvince.get(d.province) ?? 0) + 1)
     const topProvince = [...byProvince.entries()].sort((a, b) => b[1] - a[1])[0]?.[0] ?? null
@@ -192,7 +188,6 @@ function buildSong(id: SongId, series: Record<RegionId, RegionSeries>, nationalB
       detections,
       hectares: HECTARES_PER_YEAR[year] * share,
       ari: ARI_PER_YEAR[year] * share,
-      co: Math.round(110 + 780 * level + rand() * 25),
       peakFrp: dots.reduce((m, d) => Math.max(m, d.frp), 0),
       topProvince,
       dots,
@@ -215,15 +210,13 @@ export function generateAll(seed = 20180101): Record<SongId, SongData> {
   ) as Record<RegionId, RegionSeries>
 
   const nationalByYear: Record<number, number> = {}
-  let peak = 0
   for (let f = 0; f < MONTH_COUNT; f++) {
     const total = REGIONS.reduce((s, r) => s + series[r.id].detections[f], 0)
     nationalByYear[frameYear(f)] = (nationalByYear[frameYear(f)] ?? 0) + total
-    peak = Math.max(peak, total)
   }
 
-  const songs = { indonesia: buildSong('indonesia', series, nationalByYear, peak) } as Record<SongId, SongData>
-  for (const r of REGIONS) songs[r.id] = buildSong(r.id, series, nationalByYear, peak)
+  const songs = { indonesia: buildSong('indonesia', series, nationalByYear) } as Record<SongId, SongData>
+  for (const r of REGIONS) songs[r.id] = buildSong(r.id, series, nationalByYear)
   return songs
 }
 

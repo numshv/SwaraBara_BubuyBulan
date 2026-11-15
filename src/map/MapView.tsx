@@ -1,6 +1,8 @@
 import { geoCentroid } from 'd3-geo'
 import { memo, useEffect, useLayoutEffect, useMemo, useRef, useState, type KeyboardEvent } from 'react'
 import type { AerosolField } from '../data/aerosol'
+import type { CoField } from '../data/co'
+import { CoRenderer } from './coLayer'
 import type { FrameData } from '../data/generate'
 import { neighbours, provinces } from '../data/geo'
 import { REGIONS, type RegionId, type SongId } from '../data/regions'
@@ -18,6 +20,8 @@ interface Props {
   wildfireOn: boolean
   aerosol: AerosolField
   smokeOn: boolean
+  co: CoField
+  coOn: boolean
   /** Experiment: burn scars, hotspot glow, sparks, darker smoke. */
   dramatic: boolean
   /** Ocean signals at the playhead; null when that layer is switched off. */
@@ -36,12 +40,13 @@ const provinceCentroids = provinces.map((p) => ({
 }))
 
 export function MapView({
-  song, frames, t, wildfireOn, aerosol, smokeOn, dramatic, oceans, reducedMotion, onOpenRegion, onExploreRegion,
+  song, frames, t, wildfireOn, aerosol, smokeOn, co, coOn, dramatic, oceans, reducedMotion, onOpenRegion, onExploreRegion,
 }: Props) {
   const boxRef = useRef<HTMLDivElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const smokeRef = useRef<HTMLCanvasElement>(null)
   const scarRef = useRef<HTMLCanvasElement>(null)
+  const coRef = useRef<HTMLCanvasElement>(null)
   const tRef = useRef(t)
   tRef.current = t
   const labelRefs = useRef<(HTMLButtonElement | null)[]>([])
@@ -174,6 +179,22 @@ export function MapView({
     return () => cancelAnimationFrame(raf)
   }, [smoke, smokeOn, reducedMotion, dramatic])
 
+  // CO as purple contours, breathing slowly on its own loop.
+  const coLines = useMemo(() => new CoRenderer(co), [co])
+  useEffect(() => {
+    if (!coOn || reducedMotion) return
+    let raf = 0
+    const loop = (now: number) => {
+      if (coRef.current) coLines.draw(coRef.current, tRef.current, viewRef.current, placeRef.current, now / 1000)
+      raf = requestAnimationFrame(loop)
+    }
+    raf = requestAnimationFrame(loop)
+    return () => cancelAnimationFrame(raf)
+  }, [coLines, coOn, reducedMotion])
+  useEffect(() => {
+    if (reducedMotion && coOn && coRef.current) coLines.draw(coRef.current, t, view, placeRef.current, 0)
+  }, [reducedMotion, coOn, coLines, t, view, geom, wide])
+
   // Reduced motion: no loop, so redraw the still haze whenever the month or zoom changes.
   useEffect(() => {
     if (reducedMotion && smokeOn && smokeRef.current) smoke.draw(smokeRef.current, t, view, placeRef.current, 0, false, dramatic)
@@ -208,6 +229,7 @@ export function MapView({
           aria-hidden="true"
         />
         <canvas ref={smokeRef} className={styles.smoke} style={{ opacity: smokeOn ? 1 : 0 }} aria-hidden="true" />
+        <canvas ref={coRef} className={styles.smoke} style={{ opacity: coOn ? 1 : 0 }} aria-hidden="true" />
         <canvas ref={canvasRef} className={styles.fires} style={{ opacity: wildfireOn ? 1 : 0 }} aria-hidden="true" />
         {/* Fades the map into the page towards the screen edges, under the surrounding UI. */}
         <div className={styles.vignette} aria-hidden="true" />

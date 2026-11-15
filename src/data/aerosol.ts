@@ -137,14 +137,14 @@ export function getAerosol(national: FrameData[]): AerosolField {
 }
 
 /** AOD at a fractional playhead position, blending neighbouring months. */
-export function aodBlend(field: AerosolField, t: number, k: number): number {
+export function aodBlend(field: Pick<AerosolField, 'frames'>, t: number, k: number): number {
   const f0 = clampFrame(t)
   const f1 = clampFrame(t + 1)
   const e = Math.min(1, Math.max(0, t - Math.floor(t)))
   return field.frames[f0][k] * (1 - e) + field.frames[f1][k] * e
 }
 
-export function windAt(field: AerosolField, t: number): [number, number] {
+export function windAt(field: Pick<AerosolField, 'wind'>, t: number): [number, number] {
   const a = field.wind[clampFrame(t)]
   const b = field.wind[clampFrame(t + 1)]
   const e = Math.min(1, Math.max(0, t - Math.floor(t)))

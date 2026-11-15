@@ -1,4 +1,4 @@
-/* Radiative power, fire brightness and aerosol stacked in one column. */
+/* Radiative power, fire brightness, aerosol and CO stacked in one column. */
 .legend {
   display: grid;
   justify-items: start;
@@ -91,4 +91,28 @@
   border-radius: 50%;
   background: #ffb45a;
   box-shadow: 0 0 6px rgba(255, 106, 61, 0.7);
+}
+
+/* One short purple stroke per contour level, faint to bright like on the map. */
+.contours {
+  display: flex;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.contours li {
+  display: grid;
+  justify-items: start;
+  gap: 4px;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.contourLine {
+  width: 32px;
+  min-height: 1px;
+  border-radius: 1px;
+  background: #924fbf;
 }

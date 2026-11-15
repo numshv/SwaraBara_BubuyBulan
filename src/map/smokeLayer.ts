@@ -61,8 +61,8 @@ export class SmokeRenderer {
   private raster = document.createElement('canvas')
   private haze = document.createElement('canvas')
   private hazeKey = ''
-  private sprites = [11, 23, 37, 51].map((s) => makeCloudSprite(s, SMOKE))
-  private dramaticSprites = [11, 23, 37, 51].map((s) => makeCloudSprite(s, SMOKE_DRAMATIC))
+  private sprites: HTMLCanvasElement[]
+  private dramaticSprites: HTMLCanvasElement[]
   private dramatic = false
   private weights = new Float32Array(NX * NY)
   private totalWeight = 0
@@ -70,6 +70,8 @@ export class SmokeRenderer {
   private lastT = Number.NaN
 
   constructor(private field: AerosolField) {
+    this.sprites = [11, 23, 37, 51].map((s) => makeCloudSprite(s, SMOKE))
+    this.dramaticSprites = [11, 23, 37, 51].map((s) => makeCloudSprite(s, SMOKE_DRAMATIC))
     this.raster.width = NX
     this.raster.height = NY
   }

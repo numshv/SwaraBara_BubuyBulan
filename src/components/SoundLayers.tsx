@@ -42,6 +42,8 @@ interface Props {
   layers: Layers
   frames: FrameData[]
   aerosolPeaks: AerosolPeak[]
+  /** Highest CO (ppb) in view, per month. */
+  coPeaks: number[]
   climate: ClimateSeries
   t: number
   playing: boolean
@@ -49,7 +51,7 @@ interface Props {
   onToggle: (id: LayerId) => void
 }
 
-export function SoundLayers({ layers, frames, aerosolPeaks, climate, t, playing, reducedMotion, onToggle }: Props) {
+export function SoundLayers({ layers, frames, aerosolPeaks, coPeaks, climate, t, playing, reducedMotion, onToggle }: Props) {
   // Per-song scales, so every meter spans its own 2018–2025 range.
   const scales = useMemo(() => {
     const fireEvents: MeterEvent[][] = frames.map((fr) => fr.dots.map((d) => ({ offset: d.offset, w: Math.sqrt(d.frp) })))
@@ -58,11 +60,11 @@ export function SoundLayers({ layers, frames, aerosolPeaks, climate, t, playing,
       fireBusy: busyEnvelope(fireEvents, FIRE_TAU),
       detections: range(frames.map((fr) => fr.detections)),
       aod: range(aerosolPeaks.map((p) => p.aod)),
-      co: range(frames.map((fr) => fr.co)),
+      co: range(coPeaks),
       oni: range(climate.oni),
       iod: range(climate.iod),
     }
-  }, [frames, aerosolPeaks, climate])
+  }, [frames, aerosolPeaks, coPeaks, climate])
 
   const f = clampFrame(t)
   const frame = frames[f]
@@ -78,7 +80,7 @@ export function SoundLayers({ layers, frames, aerosolPeaks, climate, t, playing,
       case 'aerosol':
         return normalise(glide(aerosolPeaks.map((p) => p.aod), t), scales.aod) + wobble(0.04, 19, 0)
       case 'co':
-        return normalise(glide(frames.map((fr) => fr.co), t), scales.co) + wobble(0.05, 37, 1.3)
+        return normalise(glide(coPeaks, t), scales.co) + wobble(0.05, 37, 1.3)
       case 'elnino':
         return normalise(glide(climate.oni, t), scales.oni)
       case 'iod':
@@ -98,7 +100,7 @@ export function SoundLayers({ layers, frames, aerosolPeaks, climate, t, playing,
       short: `${climate.iod[f] > 0 ? '+' : ''}${climate.iod[f].toFixed(1)} DMI`,
       spoken: `Indian Ocean Dipole index ${climate.iod[f].toFixed(1)}`,
     },
-    co: { short: `${frame.co} ppb`, spoken: `${frame.co} parts per billion` },
+    co: { short: `${coPeaks[f]} ppb`, spoken: `${coPeaks[f]} parts per billion` },
   }
 
   return (

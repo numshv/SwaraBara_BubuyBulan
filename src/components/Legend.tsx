@@ -1,3 +1,4 @@
+import { CO_LEVELS } from '../map/coLayer'
 import styles from './Legend.module.css'
 
 /** Five colour steps between the six brightness ticks (bright_ti4 saturates at 367 K). */
@@ -63,6 +64,21 @@ export function Legend() {
             </span>
           ))}
         </div>
+      </figure>
+
+      <figure className={styles.scale}>
+        <figcaption>
+          Carbon monoxide (ppb)
+          <span className="sr-only">: purple contour lines at 250, 400, 600 and 800 parts per billion, brighter towards the core.</span>
+        </figcaption>
+        <ul className={styles.contours} aria-hidden="true">
+          {CO_LEVELS.map((level, i) => (
+            <li key={level}>
+              <span className={styles.contourLine} style={{ opacity: 0.35 + i * 0.17, height: 0.7 + i * 0.25 }} />
+              {level}
+            </li>
+          ))}
+        </ul>
       </figure>
     </section>
   )

@@ -13,6 +13,7 @@ import { LAYER_NAMES, SoundLayers, type LayerId, type Layers } from './component
 import { INTRO_STEPS, PLAY_STEPS, Tour } from './components/Tour'
 import { describeHaze, getAerosol, type AerosolField } from './data/aerosol'
 import { getClimate, type ClimateSeries } from './data/climate'
+import { getCo, type CoField } from './data/co'
 import { getSongs, type SongData } from './data/generate'
 import { CUES, INTRO_TEXT, cueIndexAt, type Cue } from './data/narration'
 import { REGIONS, REGION_BY_ID, songName, songTitle, type RegionId, type SongId } from './data/regions'
@@ -35,13 +36,13 @@ export default function App() {
 type Stage = 'intro' | 'play'
 type DialogId = 'settings' | 'help'
 
-function monthSummary(song: SongData, aerosol: AerosolField, climate: ClimateSeries, frame: number): string {
+function monthSummary(song: SongData, aerosol: AerosolField, co: CoField, climate: ClimateSeries, frame: number): string {
   const i = clampFrame(frame)
   const f = song.frames[i]
   const where = f.topProvince ? `, most in ${f.topProvince}` : ''
   const haze = describeHaze(aerosol.peaks[song.id][i])
   const sign = (v: number) => `${v > 0 ? 'plus ' : v < 0 ? 'minus ' : ''}${Math.abs(v).toFixed(1)}`
-  return `${frameLabel(frame)}: ${formatNumber(f.detections)} fire spots${where}. ${haze}. ENSO ${sign(climate.oni[i])}, IOD ${sign(climate.iod[i])}.`
+  return `${frameLabel(frame)}: ${formatNumber(f.detections)} fire spots${where}. ${haze}. Carbon monoxide up to ${co.peaks[song.id][i]} ppb. ENSO ${sign(climate.oni[i])}, IOD ${sign(climate.iod[i])}.`
 }
 
 function Experience({ prefs, update }: { prefs: Prefs; update: (p: Partial<Prefs>) => void }) {
@@ -83,6 +84,7 @@ function Experience({ prefs, update }: { prefs: Prefs; update: (p: Partial<Prefs
   // The haze field is national; island views read the same grid, zoomed in.
   const aerosol = useMemo(() => (songs ? getAerosol(songs.indonesia.frames) : null), [songs])
   const climate = getClimate()
+  const co = useMemo(() => (songs && aerosol ? getCo(songs.indonesia.frames, aerosol.wind) : null), [songs, aerosol])
 
   // Playback loop.
   const running = clock.playing && !holding && !tour
@@ -131,7 +133,7 @@ function Experience({ prefs, update }: { prefs: Prefs; update: (p: Partial<Prefs
   // Audio mode: spoken map summary every January and at seasonal peaks.
   const month = clampFrame(clock.t)
   useEffect(() => {
-    if (!audioMode || !clock.playing || !data || !aerosol || lastMonth.current === month) return
+    if (!audioMode || !clock.playing || !data || !aerosol || !co || lastMonth.current === month) return
     lastMonth.current = month
     if (cues.some((c) => c.frame === month)) return
     const d = data.frames
@@ -140,8 +142,8 @@ function Experience({ prefs, update }: { prefs: Prefs; update: (p: Partial<Prefs
       d[month].detections >= 0.5 * peak &&
       d[month].detections >= (d[month - 1]?.detections ?? 0) &&
       d[month].detections >= (d[month + 1]?.detections ?? 0)
-    if (frameMonth(month) === 0 || isPeak) announce(monthSummary(data, aerosol, climate, month))
-  }, [audioMode, clock.playing, month, data, aerosol, climate, cues, announce])
+    if (frameMonth(month) === 0 || isPeak) announce(monthSummary(data, aerosol, co, climate, month))
+  }, [audioMode, clock.playing, month, data, aerosol, co, climate, cues, announce])
 
   // Song end.
   useEffect(() => {
@@ -216,7 +218,7 @@ function Experience({ prefs, update }: { prefs: Prefs; update: (p: Partial<Prefs
     releaseHold()
     const t = Math.min(Math.max(Math.floor(clock.t) + months, 0), MONTH_COUNT - 1)
     dispatch({ type: 'step', months })
-    if (data && aerosol) announce(monthSummary(data, aerosol, climate, t))
+    if (data && aerosol && co) announce(monthSummary(data, aerosol, co, climate, t))
   }
 
   // Narrates the chapter landed on, immediately if playing, otherwise once playback resumes.
@@ -316,7 +318,7 @@ function Experience({ prefs, update }: { prefs: Prefs; update: (p: Partial<Prefs
     return () => window.removeEventListener('keydown', onKey)
   }, [])
 
-  if (!songs || !data || !frame || !aerosol) {
+  if (!songs || !data || !frame || !aerosol || !co) {
     return (
       <div className={styles.loading} role="status">
         Preparing eight years of fire data…
@@ -388,6 +390,8 @@ function Experience({ prefs, update }: { prefs: Prefs; update: (p: Partial<Prefs
             wildfireOn={layers.wildfire}
             aerosol={aerosol}
             smokeOn={layers.aerosol}
+            co={co}
+            coOn={layers.co}
             dramatic={prefs.dramaticFx}
             oceans={{
               enso: layers.elnino ? glide(climate.oni, clock.t) : null,
@@ -409,6 +413,7 @@ function Experience({ prefs, update }: { prefs: Prefs; update: (p: Partial<Prefs
                 layers={layers}
                 frames={data.frames}
                 aerosolPeaks={aerosol.peaks[song]}
+                coPeaks={co.peaks[song]}
                 climate={climate}
                 t={clock.t}
                 playing={running}

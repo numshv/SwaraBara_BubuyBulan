@@ -59,6 +59,13 @@ describe('generateClimate', () => {
     expect(Math.max(...c.oni.slice(66, 74))).toBeGreaterThan(1.5)
   })
 
+  it('has a strong positive IOD in 2019, negative 2021–22 and positive 2023', () => {
+    expect(c.iod).toHaveLength(MONTH_COUNT)
+    expect(Math.max(...c.iod.slice(18, 24))).toBeGreaterThan(1.5)
+    expect(Math.min(...c.iod.slice(40, 58))).toBeLessThan(-0.7)
+    expect(Math.max(...c.iod.slice(66, 72))).toBeGreaterThan(1.2)
+  })
+
   it('has rising CO₂', () => {
     expect(c.co2[95]).toBeGreaterThan(c.co2[0] + 15)
   })

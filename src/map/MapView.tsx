@@ -20,6 +20,8 @@ interface Props {
   smokeOn: boolean
   /** Experiment: burn scars, hotspot glow, sparks, darker smoke. */
   dramatic: boolean
+  /** Ocean signals at the playhead; null when that layer is switched off. */
+  oceans: { enso: number | null; iod: number | null }
   reducedMotion: boolean
   onOpenRegion: (id: RegionId) => void
   onExploreRegion: (id: RegionId) => void
@@ -34,7 +36,7 @@ const provinceCentroids = provinces.map((p) => ({
 }))
 
 export function MapView({
-  song, frames, t, wildfireOn, aerosol, smokeOn, dramatic, reducedMotion, onOpenRegion, onExploreRegion,
+  song, frames, t, wildfireOn, aerosol, smokeOn, dramatic, oceans, reducedMotion, onOpenRegion, onExploreRegion,
 }: Props) {
   const boxRef = useRef<HTMLDivElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
@@ -209,7 +211,13 @@ export function MapView({
         <canvas ref={canvasRef} className={styles.fires} style={{ opacity: wildfireOn ? 1 : 0.25 }} aria-hidden="true" />
         {/* Fades the map into the page towards the screen edges, under the surrounding UI. */}
         <div className={styles.vignette} aria-hidden="true" />
+        {/* Ocean light: Indian Ocean (IOD) from the west, Pacific (ENSO) from the east. */}
+        <OceanGlow side="west" value={oceans.iod} />
+        <OceanGlow side="east" value={oceans.enso} />
       </div>
+
+      <OceanLabel side="west" ocean="Indian Ocean" index="IOD" value={oceans.iod} />
+      <OceanLabel side="east" ocean="Pacific" index="ENSO" value={oceans.enso} />
 
       {!national && (
         <div className={styles.provinceLabels} aria-hidden="true">
@@ -324,4 +332,33 @@ function useWide(): boolean {
     return () => mq.removeEventListener('change', onChange)
   }, [])
   return wide
+}
+
+/** Positive (El Niño / positive IOD) means a drier Indonesia; negative means wetter. */
+function oceanTone(v: number): 'drier' | 'wetter' | 'neutral' {
+  return v >= 0.4 ? 'drier' : v <= -0.4 ? 'wetter' : 'neutral'
+}
+
+const signed = (v: number) => `${v > 0 ? '+' : ''}${v.toFixed(1)}`
+
+function OceanGlow({ side, value }: { side: 'west' | 'east'; value: number | null }) {
+  const v = value ?? 0
+  return (
+    <div
+      className={styles.oceanGlow}
+      data-side={side}
+      data-tone={v >= 0 ? 'warm' : 'cool'}
+      style={{ opacity: value === null ? 0 : Math.min(1, Math.abs(v) / 2) * 0.35 }}
+      aria-hidden="true"
+    />
+  )
+}
+
+function OceanLabel({ side, ocean, index, value }: { side: 'west' | 'east'; ocean: string; index: string; value: number | null }) {
+  if (value === null) return null
+  return (
+    <p className={styles.oceanLabel} data-side={side} aria-hidden="true">
+      {ocean} · {index} {signed(value)} · {oceanTone(value)}
+    </p>
+  )
 }

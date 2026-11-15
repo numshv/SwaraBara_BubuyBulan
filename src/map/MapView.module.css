@@ -41,6 +41,47 @@
   display: block;
 }
 
+/* Ocean light from the map's edges: warm when that ocean pushes Indonesia drier, cool when wetter. */
+.oceanGlow {
+  position: absolute;
+  inset: 0;
+  mix-blend-mode: screen;
+  transition: opacity 1.2s var(--ease);
+  --tone: 232 96 48;
+}
+
+.oceanGlow[data-tone='cool'] {
+  --tone: 70 120 210;
+}
+
+.oceanGlow[data-side='west'] {
+  background: linear-gradient(to right, rgb(var(--tone) / 0.9), rgb(var(--tone) / 0) 32%);
+}
+
+.oceanGlow[data-side='east'] {
+  background: linear-gradient(to left, rgb(var(--tone) / 0.9), rgb(var(--tone) / 0) 32%);
+}
+
+.oceanLabel {
+  position: absolute;
+  top: 50%;
+  margin: 0;
+  font-size: 0.68rem;
+  color: var(--text-faint);
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.oceanLabel[data-side='west'] {
+  left: 10px;
+  transform: translate(-50%, -50%) rotate(-90deg);
+}
+
+.oceanLabel[data-side='east'] {
+  left: calc(100% - 10px);
+  transform: translate(-50%, -50%) rotate(90deg);
+}
+
 .scars,
 .smoke,
 .fires {

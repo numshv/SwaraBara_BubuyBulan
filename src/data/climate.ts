@@ -11,6 +11,12 @@ const ONI_ANCHORS: [number, number][] = [
   [58, -0.9], [63, 0.1], [71, 1.9], [80, 0.0], [86, -0.4], [95, -0.2],
 ]
 
+/** IOD (DMI) anchor points: strong positive late 2019, negative 2021–22, positive 2023. */
+const IOD_ANCHORS: [number, number][] = [
+  [0, -0.1], [9, 0.6], [14, 0.0], [21, 2.0], [26, 0.1], [36, -0.2], [43, -0.9], [50, -0.2],
+  [55, -0.4], [56, -1.0], [61, -0.2], [69, 1.5], [75, 0.2], [82, -0.5], [88, 0.1], [95, 0.0],
+]
+
 /** Rain (mm/month) by calendar month: wet monsoon Nov–Mar, driest Aug–Sep. */
 const RAIN_SEASON = [310, 280, 290, 240, 190, 140, 110, 80, 90, 160, 250, 320]
 
@@ -23,6 +29,8 @@ export interface RainEvent {
 
 export interface ClimateSeries {
   oni: number[]
+  /** Indian Ocean Dipole, Dipole Mode Index. */
+  iod: number[]
   co2: number[]
   rain: number[]
   /** Rain days per month, sorted by offset. */
@@ -43,7 +51,10 @@ function interpolate(anchors: [number, number][], f: number): number {
 
 export function generateClimate(seed = 99): ClimateSeries {
   const rand = mulberry32(seed)
+  // Separate stream so adding IOD leaves the other series unchanged.
+  const iodRand = mulberry32(seed + 1)
   const oni: number[] = []
+  const iod: number[] = []
   const co2: number[] = []
   const rain: number[] = []
   const rainDays: RainEvent[][] = []
@@ -51,6 +62,7 @@ export function generateClimate(seed = 99): ClimateSeries {
   for (let f = 0; f < MONTH_COUNT; f++) {
     const o = interpolate(ONI_ANCHORS, f) + (rand() - 0.5) * 0.1
     oni.push(Math.round(o * 10) / 10)
+    iod.push(Math.round((interpolate(IOD_ANCHORS, f) + (iodRand() - 0.5) * 0.1) * 10) / 10)
 
     // ~2.4 ppm/yr trend with a small seasonal cycle.
     const years = f / 12
@@ -67,7 +79,7 @@ export function generateClimate(seed = 99): ClimateSeries {
     for (let d = 0; d < days; d++) events.push({ offset: rand(), size: 0.3 + rand() * 0.7 })
     rainDays.push(events.sort((a, b) => a.offset - b.offset))
   }
-  return { oni, co2, rain, rainDays }
+  return { oni, iod, co2, rain, rainDays }
 }
 
 let cache: ClimateSeries | null = null

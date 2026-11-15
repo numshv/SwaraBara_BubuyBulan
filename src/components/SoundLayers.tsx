@@ -6,7 +6,7 @@ import { clampFrame, formatNumber } from '../data/time'
 import { busyEnvelope, envelope, glide, hitLevel, normalise, range, type MeterEvent } from '../sound/meters'
 import styles from './SoundLayers.module.css'
 
-export type LayerId = 'wildfire' | 'aerosol' | 'elnino' | 'co2' | 'co' | 'rain'
+export type LayerId = 'wildfire' | 'aerosol' | 'elnino' | 'iod' | 'co2' | 'co' | 'rain'
 export type Layers = Record<LayerId, boolean>
 
 interface LayerDef {
@@ -22,6 +22,8 @@ export const LAYERS: LayerDef[] = [
   { id: 'wildfire', name: 'Wildfire', instrument: 'Bonang', color: '#de4a3d' },
   { id: 'aerosol', name: 'Aerosol', instrument: 'Gong ageng', color: '#e8e4dc' },
   { id: 'elnino', name: 'El Niño', instrument: 'Kendang', color: '#efcd57' },
+  // Placeholder colour: the palette had no unused colour left.
+  { id: 'iod', name: 'IOD', instrument: 'Slenthem', color: '#4fa3bf' },
   { id: 'co2', name: 'CO₂', instrument: 'Gender', color: '#349800' },
   { id: 'co', name: 'CO', instrument: 'Saron', color: '#924fbf' },
   { id: 'rain', name: 'Rain', instrument: 'Suling', color: '#5a4fbf' },
@@ -64,6 +66,7 @@ export function SoundLayers({ layers, frames, aerosolPeaks, climate, t, playing,
       aod: range(aerosolPeaks.map((p) => p.aod)),
       co: range(frames.map((fr) => fr.co)),
       oni: range(climate.oni),
+      iod: range(climate.iod),
       co2: range(climate.co2),
       rain: range(climate.rain),
     }
@@ -90,6 +93,8 @@ export function SoundLayers({ layers, frames, aerosolPeaks, climate, t, playing,
         return normalise(glide(frames.map((fr) => fr.co), t), scales.co) + wobble(0.05, 37, 1.3)
       case 'elnino':
         return normalise(glide(climate.oni, t), scales.oni)
+      case 'iod':
+        return normalise(glide(climate.iod, t), scales.iod)
       case 'co2':
         return normalise(glide(climate.co2, t), scales.co2)
     }
@@ -102,6 +107,10 @@ export function SoundLayers({ layers, frames, aerosolPeaks, climate, t, playing,
     elnino: {
       short: `${climate.oni[f] > 0 ? '+' : ''}${climate.oni[f].toFixed(1)} ONI`,
       spoken: `Oceanic Niño Index ${climate.oni[f].toFixed(1)}`,
+    },
+    iod: {
+      short: `${climate.iod[f] > 0 ? '+' : ''}${climate.iod[f].toFixed(1)} DMI`,
+      spoken: `Indian Ocean Dipole index ${climate.iod[f].toFixed(1)}`,
     },
     co2: { short: `${climate.co2[f].toFixed(1)} ppm`, spoken: `${climate.co2[f].toFixed(1)} parts per million` },
     co: { short: `${frame.co} ppb`, spoken: `${frame.co} parts per billion` },

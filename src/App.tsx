@@ -12,12 +12,13 @@ import { Player } from './components/Player'
 import { LAYER_NAMES, SoundLayers, type LayerId, type Layers } from './components/SoundLayers'
 import { INTRO_STEPS, PLAY_STEPS, Tour } from './components/Tour'
 import { describeHaze, getAerosol, type AerosolField } from './data/aerosol'
-import { getClimate } from './data/climate'
+import { getClimate, type ClimateSeries } from './data/climate'
 import { getSongs, type SongData } from './data/generate'
 import { CUES, INTRO_TEXT, cueIndexAt, type Cue } from './data/narration'
 import { REGIONS, REGION_BY_ID, songName, songTitle, type RegionId, type SongId } from './data/regions'
 import { MONTH_COUNT, clampFrame, frameLabel, frameMonth, formatNumber } from './data/time'
 import { MapView } from './map/MapView'
+import { glide } from './sound/meters'
 import { usePrefs, useReducedMotion, type Prefs } from './prefs'
 import { clockReducer, initialClock, type ClockState } from './timeline/clock'
 import styles from './App.module.css'
@@ -34,11 +35,13 @@ export default function App() {
 type Stage = 'intro' | 'play'
 type DialogId = 'settings' | 'help'
 
-function monthSummary(song: SongData, aerosol: AerosolField, frame: number): string {
-  const f = song.frames[clampFrame(frame)]
+function monthSummary(song: SongData, aerosol: AerosolField, climate: ClimateSeries, frame: number): string {
+  const i = clampFrame(frame)
+  const f = song.frames[i]
   const where = f.topProvince ? `, most in ${f.topProvince}` : ''
-  const haze = describeHaze(aerosol.peaks[song.id][clampFrame(frame)])
-  return `${frameLabel(frame)}: ${formatNumber(f.detections)} fire spots${where}. ${haze}.`
+  const haze = describeHaze(aerosol.peaks[song.id][i])
+  const sign = (v: number) => `${v > 0 ? 'plus ' : v < 0 ? 'minus ' : ''}${Math.abs(v).toFixed(1)}`
+  return `${frameLabel(frame)}: ${formatNumber(f.detections)} fire spots${where}. ${haze}. ENSO ${sign(climate.oni[i])}, IOD ${sign(climate.iod[i])}.`
 }
 
 function Experience({ prefs, update }: { prefs: Prefs; update: (p: Partial<Prefs>) => void }) {
@@ -49,7 +52,7 @@ function Experience({ prefs, update }: { prefs: Prefs; update: (p: Partial<Prefs
   const [songs, setSongs] = useState<Record<SongId, SongData> | null>(null)
   const [song, setSong] = useState<SongId>('indonesia')
   const [clock, dispatch] = useReducer(clockReducer, initialClock)
-  const [layers, setLayers] = useState<Layers>({ wildfire: true, aerosol: true, elnino: true, co2: true, co: true, rain: true })
+  const [layers, setLayers] = useState<Layers>({ wildfire: true, aerosol: true, elnino: true, iod: true, co2: true, co: true, rain: true })
   const [unlocked, setUnlocked] = useState(false)
   const [tour, setTour] = useState<Stage | null>(null)
   const [dialog, setDialog] = useState<DialogId | null>(null)
@@ -137,8 +140,8 @@ function Experience({ prefs, update }: { prefs: Prefs; update: (p: Partial<Prefs
       d[month].detections >= 0.5 * peak &&
       d[month].detections >= (d[month - 1]?.detections ?? 0) &&
       d[month].detections >= (d[month + 1]?.detections ?? 0)
-    if (frameMonth(month) === 0 || isPeak) announce(monthSummary(data, aerosol, month))
-  }, [audioMode, clock.playing, month, data, aerosol, cues, announce])
+    if (frameMonth(month) === 0 || isPeak) announce(monthSummary(data, aerosol, climate, month))
+  }, [audioMode, clock.playing, month, data, aerosol, climate, cues, announce])
 
   // Song end.
   useEffect(() => {
@@ -213,7 +216,7 @@ function Experience({ prefs, update }: { prefs: Prefs; update: (p: Partial<Prefs
     releaseHold()
     const t = Math.min(Math.max(Math.floor(clock.t) + months, 0), MONTH_COUNT - 1)
     dispatch({ type: 'step', months })
-    if (data && aerosol) announce(monthSummary(data, aerosol, t))
+    if (data && aerosol) announce(monthSummary(data, aerosol, climate, t))
   }
 
   // Narrates the chapter landed on, immediately if playing, otherwise once playback resumes.
@@ -386,6 +389,10 @@ function Experience({ prefs, update }: { prefs: Prefs; update: (p: Partial<Prefs
             aerosol={aerosol}
             smokeOn={layers.aerosol}
             dramatic={prefs.dramaticFx}
+            oceans={{
+              enso: layers.elnino ? glide(climate.oni, clock.t) : null,
+              iod: layers.iod ? glide(climate.iod, clock.t) : null,
+            }}
             reducedMotion={reducedMotion}
             onOpenRegion={openRegion}
             onExploreRegion={exploreRegion}

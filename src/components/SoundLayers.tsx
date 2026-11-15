@@ -1,5 +1,5 @@
 import { useMemo, type CSSProperties } from 'react'
-import type { AerosolPeak } from '../data/aerosol'
+import type { AotSeries } from '../data/aerosol'
 import type { ClimateSeries } from '../data/climate'
 import type { FrameData } from '../data/generate'
 import { clampFrame, formatNumber } from '../data/time'
@@ -12,19 +12,48 @@ export type Layers = Record<LayerId, boolean>
 interface LayerDef {
   id: LayerId
   name: string
-  /** Placeholder gamelan voice until the sound mapping is decided. */
   instrument: string
-  /** Meter and switch colour, from the project palette; aerosol stays an off-white like smoke. */
+  mapping: string
+  /** Meter and switch colour, from the project palette. */
   color: string
 }
 
 export const LAYERS: LayerDef[] = [
-  { id: 'wildfire', name: 'Wildfire', instrument: 'Bonang', color: '#de4a3d' },
-  { id: 'aerosol', name: 'Aerosol', instrument: 'Gong ageng', color: '#ea9a5cff' },
-  { id: 'elnino', name: 'El Niño', instrument: 'Kendang', color: '#efcd57' },
-  // Placeholder colour: the palette had no unused colour left.
-  { id: 'iod', name: 'IOD', instrument: 'Slenthem', color: '#4fa3bf' },
-  { id: 'co', name: 'CO', instrument: 'Saron', color: '#924fbf' },
+  {
+    id: 'wildfire',
+    name: 'Wildfire',
+    instrument: 'Peking & Panerus',
+    mapping: 'VIIRS bright_ti4 (Peking) & bright_ti5 (Panerus) note pitch, FRP volume',
+    color: '#de4a3d',
+  },
+  {
+    id: 'aerosol',
+    name: 'Aerosol',
+    instrument: 'Bonang',
+    mapping: 'MERRA-2 AOT: norm pitch, log_norm duration, anomaly-norm volume',
+    color: '#ea9a5cff',
+  },
+  {
+    id: 'elnino',
+    name: 'El Niño',
+    instrument: 'Jenglong',
+    mapping: 'Linked with IOD: ENSO pitch, IOD volume',
+    color: '#efcd57',
+  },
+  {
+    id: 'iod',
+    name: 'IOD',
+    instrument: 'Jenglong',
+    mapping: 'Linked with El Niño: ENSO pitch, IOD volume',
+    color: '#4fa3bf',
+  },
+  {
+    id: 'co',
+    name: 'CO',
+    instrument: 'Rebab',
+    mapping: 'MERRA-2 CO: higher content, louder',
+    color: '#924fbf',
+  },
 ]
 
 export const LAYER_NAMES = Object.fromEntries(LAYERS.map((l) => [l.id, l.name])) as Record<LayerId, string>
@@ -35,9 +64,10 @@ const FIRE_TAU = 0.05
 interface Props {
   layers: Layers
   frames: FrameData[]
-  aerosolPeaks: AerosolPeak[]
-  /** Highest CO (ppb) in view, per month. */
-  coPeaks: number[]
+  /** This song's MERRA-2 AOT series. */
+  aot: AotSeries
+  /** This song's CO (ppb), per month. */
+  co: number[]
   climate: ClimateSeries
   t: number
   playing: boolean
@@ -45,7 +75,7 @@ interface Props {
   onToggle: (id: LayerId) => void
 }
 
-export function SoundLayers({ layers, frames, aerosolPeaks, coPeaks, climate, t, playing, reducedMotion, onToggle }: Props) {
+export function SoundLayers({ layers, frames, aot, co, climate, t, playing, reducedMotion, onToggle }: Props) {
   // Per-song scales, so every meter spans its own 2018–2025 range.
   const scales = useMemo(() => {
     const fireEvents: MeterEvent[][] = frames.map((fr) => fr.dots.map((d) => ({ offset: d.offset, w: Math.sqrt(d.frp) })))
@@ -53,12 +83,12 @@ export function SoundLayers({ layers, frames, aerosolPeaks, coPeaks, climate, t,
       fireEvents,
       fireBusy: busyEnvelope(fireEvents, FIRE_TAU),
       detections: range(frames.map((fr) => fr.detections)),
-      aod: range(aerosolPeaks.map((p) => p.aod)),
-      co: range(coPeaks),
-      oni: range(climate.oni),
+      aot: range(aot.norm),
+      co: range(co),
+      enso: range(climate.enso),
       iod: range(climate.iod),
     }
-  }, [frames, aerosolPeaks, coPeaks, climate])
+  }, [frames, aot, co, climate])
 
   const f = clampFrame(t)
   const frame = frames[f]
@@ -72,11 +102,12 @@ export function SoundLayers({ layers, frames, aerosolPeaks, coPeaks, climate, t,
           ? normalise(glide(frames.map((fr) => fr.detections), t), scales.detections)
           : hitLevel(envelope(scales.fireEvents, t, FIRE_TAU), scales.fireBusy)
       case 'aerosol':
-        return normalise(glide(aerosolPeaks.map((p) => p.aod), t), scales.aod) + wobble(0.04, 19, 0)
+        // Bonang's note follows the normalised AOT.
+        return normalise(glide(aot.norm, t), scales.aot) + wobble(0.04, 19, 0)
       case 'co':
-        return normalise(glide(coPeaks, t), scales.co) + wobble(0.05, 37, 1.3)
+        return normalise(glide(co, t), scales.co) + wobble(0.05, 37, 1.3)
       case 'elnino':
-        return normalise(glide(climate.oni, t), scales.oni)
+        return normalise(glide(climate.enso, t), scales.enso)
       case 'iod':
         return normalise(glide(climate.iod, t), scales.iod)
     }
@@ -85,16 +116,16 @@ export function SoundLayers({ layers, frames, aerosolPeaks, coPeaks, climate, t,
   // Numbers change once a month; the meters carry the fast movement.
   const values: Record<LayerId, { short: string; spoken: string }> = {
     wildfire: { short: `${formatNumber(frame.detections)} spots`, spoken: `${formatNumber(frame.detections)} fire spots this month` },
-    aerosol: { short: `AOD ${aerosolPeaks[f].aod.toFixed(2)}`, spoken: `aerosol optical depth ${aerosolPeaks[f].aod.toFixed(2)}` },
+    aerosol: { short: `AOT ${aot.aot[f].toFixed(3)}`, spoken: `organic carbon aerosol optical thickness ${aot.aot[f].toFixed(3)}` },
     elnino: {
-      short: `${climate.oni[f] > 0 ? '+' : ''}${climate.oni[f].toFixed(1)} ONI`,
-      spoken: `Oceanic Niño Index ${climate.oni[f].toFixed(1)}`,
+      short: `ENSO ${climate.enso[f] > 0 ? '+' : ''}${climate.enso[f].toFixed(2)}`,
+      spoken: `ENSO index ${climate.enso[f].toFixed(2)}`,
     },
     iod: {
-      short: `${climate.iod[f] > 0 ? '+' : ''}${climate.iod[f].toFixed(1)} DMI`,
-      spoken: `Indian Ocean Dipole index ${climate.iod[f].toFixed(1)}`,
+      short: `IOD ${climate.iod[f] > 0 ? '+' : ''}${climate.iod[f].toFixed(2)}`,
+      spoken: `Indian Ocean Dipole index ${climate.iod[f].toFixed(2)}`,
     },
-    co: { short: `${coPeaks[f]} ppb`, spoken: `${coPeaks[f]} parts per billion` },
+    co: { short: `${Math.round(co[f])} ppb`, spoken: `carbon monoxide ${Math.round(co[f])} parts per billion` },
   }
 
   return (
@@ -103,7 +134,7 @@ export function SoundLayers({ layers, frames, aerosolPeaks, coPeaks, climate, t,
         Sound layer controls
       </h2>
       <ul className={styles.list}>
-        {LAYERS.map(({ id, name, instrument, color }) => {
+        {LAYERS.map(({ id, name, instrument, mapping, color }) => {
           const on = layers[id]
           const lvl = on ? Math.min(1, Math.max(0, level(id))) : 0
           return (
@@ -115,7 +146,8 @@ export function SoundLayers({ layers, frames, aerosolPeaks, coPeaks, climate, t,
                 className={styles.row}
                 style={{ '--c': color } as CSSProperties}
                 onClick={() => onToggle(id)}
-                aria-label={`${name}, played by ${instrument.toLowerCase()}`}
+                title={mapping}
+                aria-label={`${name}, played by ${instrument.toLowerCase()}. ${mapping}`}
                 aria-describedby={`layer-${id}-value`}
               >
                 <span className={styles.pill} aria-hidden="true" />
@@ -135,6 +167,7 @@ export function SoundLayers({ layers, frames, aerosolPeaks, coPeaks, climate, t,
           )
         })}
       </ul>
+      <p className={styles.note}>Goong marks every 1-year interval during playback.</p>
     </section>
   )
 }

@@ -1,0 +1,217 @@
+{
+  "intro": "Between 2018 and 2025, satellites recorded hundreds of thousands of fire detections across Indonesia, and this jukebox turns each of them into sound. As you move from region to region, every track tells its own fire story. Beyond the numbers, however, are people who could not breathe in their own homes and animals that had nowhere left to go.",
+  "regions": {
+    "indonesia": [
+      {
+        "frame": 0,
+        "slice": "2018",
+        "title": "Eight years of fire",
+        "text": "Between 2018 and 2025, satellites recorded hundreds of thousands of fire detections across Indonesia, and this jukebox turns each of them into sound. As you move from region to region, every track tells its own fire story. Beyond the numbers, however, are people who could not breathe in their own homes and animals that had nowhere left to go. Every note you hear is a cluster of fires that the satellite saw from orbit, and every glowing dot on the map marks the same fire. Over the next few minutes, you will hear how the wildfires in Indonesia rise and fall.",
+        "art": "horizon"
+      },
+      {
+        "frame": 12,
+        "slice": "2019",
+        "title": "2018 · Asian Games haze",
+        "text": "In August 2018, as Palembang co-hosts the Asian Games, peat is already burning in Ogan Komering Ilir, about 70 kilometres away. Officials race to keep the air clear for the athletes, yet in Pontianak, schools still close because of the smoke. By October, the Games are over, but the haze has not left-- for days, it sits thick over Palembang.",
+        "art": "flames"
+      },
+      {
+        "frame": 24,
+        "slice": "2020-2022",
+        "title": "2019 · The red noon sky",
+        "text": "In 2019, a strong positive Indian Ocean Dipole holds back the rain, so the drained peat dries out and catches fire. By late September, the national disaster agency has counted 919,516 people with acute respiratory infections. In Pekanbaru, the air inside homes is so dangerous that the mayor's office becomes an emergency nursery for babies under six months old. Meanwhile, schools close and flights are cancelled, and over Jambi the noon sky turns red.",
+        "art": "haze"
+      },
+      {
+        "frame": 60,
+        "slice": "2023",
+        "title": "2020–2022 · A quiet pause",
+        "text": "From 2020 to 2022, La Niña brings wetter dry seasons, and most of the fires retreated. The burned area falls from about 1.6 million hectares in 2019 to under 300,000 in 2020 and stays low for three years, helped by peat restoration and more firefighting patrols. However, underneath, the peat is still drained.",
+        "art": "rain"
+      },
+      {
+        "frame": 72,
+        "slice": "2024",
+        "title": "2023 · El Niño returns",
+        "text": "When El Niño returns in 2023, the burned area grows about fivefold, to 1.16 million hectares by the government's count, although Greenpeace's own analysis puts it above 2 million. In South Sumatra, health offices log about 41,000 respiratory infection cases by early October. Nearly 15,000 of them are in Palembang, where smoke from Ogan Komering Ilir hangs over the city for weeks.",
+        "art": "sun"
+      },
+      {
+        "frame": 84,
+        "slice": "2025",
+        "title": "2024 · Smouldering underground",
+        "text": "In 2024, the fires fall back again. About 377,000 hectares burn, a third of 2023, and the largest share is in Bali and Nusa Tenggara. Peat, though, does not burn like grass. Instead of flaring up where a satellite can see it, it smoulders below the surface, and even after crews think the fire is out, it can burst into flame again.",
+        "art": "peat"
+      },
+      {
+        "frame": 96,
+        "title": "2025 · Burning again",
+        "text": "In July 2025, Indonesia burns again. At the peak, Riau province logs around 1,300 hotspots a day. Before long, the smoke has crossed the Strait of Malacca into Malaysia. As the haze spreads, police arrest 44 people suspected of setting the fires. By the end of the year, about 360,000 hectares have burned across the country.",
+        "art": "embers"
+      }
+    ],
+    "sumatra": [
+      {
+        "frame": 0,
+        "slice": "2018-2020",
+        "title": "Peat under pressure",
+        "text": "Riau, Jambi and South Sumatra sit on deep peat, drained by canals for acacia and oil palm. Dry peat burns like fuel.",
+        "art": "peat"
+      },
+      {
+        "frame": 36,
+        "slice": "2021-2023",
+        "title": "Riau chokes",
+        "text": "In September 2019, the air quality index in Pekanbaru goes far past hazardous. Thousands of people are treated for breathing problems.",
+        "art": "haze"
+      },
+      {
+        "frame": 72,
+        "slice": "2024-2025",
+        "title": "South Sumatra flares",
+        "text": "In 2023 the peat of Ogan Komering Ilir burns again, sending haze across the Malacca Strait.",
+        "art": "flames"
+      }
+    ],
+    "kalimantan": [
+      {
+        "frame": 0,
+        "slice": "2018-2020",
+        "title": "The peat heartland",
+        "text": "Central Kalimantan still bears the scars of the failed Mega Rice Project: a million hectares of drained peat that burns year after year.",
+        "art": "peat"
+      },
+      {
+        "frame": 36,
+        "slice": "2021-2023",
+        "title": "Palangka Raya in orange",
+        "text": "In 2019 the sky over Palangka Raya turns orange at noon. Kalimantan records more fire than any other island.",
+        "art": "haze"
+      },
+      {
+        "frame": 72,
+        "slice": "2024-2025",
+        "title": "Burning again",
+        "text": "In 2023 West and Central Kalimantan flare once more, as El Niño dries the land.",
+        "art": "sun"
+      }
+    ],
+    "java": [
+      {
+        "frame": 0,
+        "slice": "2018-2020",
+        "title": "Mountains and teak",
+        "text": "On Java, fires mostly burn teak plantations, farmland, and savannah on volcano slopes. Although they are small, they burn close to villages and cities lived by a lot of people.",
+        "art": "savannah"
+      },
+      {
+        "frame": 36,
+        "slice": "2021-2023",
+        "title": "Mount Arjuno burns",
+        "text": "In late August 2023, a fire breaks out on Mount Arjuno. Hunters are suspected of lighting it to flush animals out of the brush, and by the time it spreads past 4,000 hectares, the climbing routes have closed.",
+        "art": "flames"
+      },
+      {
+        "frame": 72,
+        "slice": "2024-2025",
+        "title": "Mount Merbabu evacuated",
+        "text": "Two months later, in late October 2023, fire climbs the slopes of Mount Merbabu in Central Java. As thick smoke drifts down into the villages of Getasan, about 300 residents, some of them short of breath, are evacuated to a shelter in Batur. By the time rain finally puts it out, satellite images show more than 1,100 hectares burned, and on the blackened slopes, searchers find the carcasses of barking deer and monkeys.",
+        "art": "haze"
+      }
+    ],
+    "sulawesi": [
+      {
+        "frame": 0,
+        "slice": "2018-2020",
+        "title": "Scattered farmland fires",
+        "text": "Unlike the great peat fires to the west, Sulawesi burns in small patches, mostly plantations and farmland that farmers clear with fire before planting.",
+        "art": "savannah"
+      },
+      {
+        "frame": 36,
+        "slice": "2021-2023",
+        "title": "El Niño in South Sulawesi",
+        "text": "During the El Niño year, South Sulawesi records 824 hectares burned between January and October, with Soppeng and Barru hit hardest.",
+        "art": "sun"
+      },
+      {
+        "frame": 72,
+        "slice": "2024-2025",
+        "title": "Central Sulawesi burns",
+        "text": "That same year, further north in Central Sulawesi, the long dry season reaches the farms. On the last night of August, fire spreads through about 60 hectares of plantation land in Nuhon, Banggai, burning around 300 coconut trees, and within a week, another 21 hectares have burned in Poso.",
+        "art": "flames"
+      }
+    ],
+    "bnt": [
+      {
+        "frame": 0,
+        "slice": "2018-2020",
+        "title": "Savannah islands",
+        "text": "Sumba, Timor and Flores are dry savannah islands, and on eastern Sumba, fire reaches about 29% of the land in an average year. Most of it is grassland that people burn on purpose, either to open sightlines for hunting or to bring up fresh grass for cattle.",
+        "art": "savannah"
+      },
+      {
+        "frame": 36,
+        "slice": "2021-2023",
+        "title": "Burning through La Niña",
+        "text": "While fires shrank elsewhere from 2020 to 2022, East Nusa Tenggara kept burning, and in those years it had the largest burned area of any province.",
+        "art": "sun"
+      },
+      {
+        "frame": 72,
+        "slice": "2024-2025",
+        "title": "Largest share in 2024",
+        "text": "Even in 2024, after the rest of the country had cooled down again, Bali and Nusa Tenggara made up the biggest share of the national total.",
+        "art": "embers"
+      }
+    ],
+    "maluku": [
+      {
+        "frame": 0,
+        "slice": "2018-2020",
+        "title": "The Spice Islands",
+        "text": "Compared with the rest of the country, Maluku suffers few fires, mostly small burns on Seram, Buru and Halmahera to clear land.",
+        "art": "horizon"
+      },
+      {
+        "frame": 36,
+        "slice": "2021-2023",
+        "title": "46,000 hectares in 2023",
+        "text": "However, in 2023, Maluku province records about 46,000 hectares burned, ninth in the country.",
+        "art": "flames"
+      },
+      {
+        "frame": 72,
+        "slice": "2024-2025",
+        "title": "East Seram",
+        "text": "Around Bula in East Seram, forestry officials map about 280 hectares of that burned land, and rather than blaming the weather, they point to people.",
+        "art": "embers"
+      }
+    ],
+    "papua": [
+      {
+        "frame": 0,
+        "slice": "2018-2020",
+        "title": "Swamp, savannah and forest",
+        "text": "In the far south of Papua, lies a wide stretch of swamp, savannah and forest that is home to about half of New Guinea's 800 or so bird species, including cassowaries and birds of paradise. Papua's land isn't susceptible to the same fires that burn in Sumatra and Kalimantan, but Papua's fires rarely make the national news, even when they spread widely.",
+        "art": "horizon"
+      },
+      {
+        "frame": 36,
+        "slice": "2021-2023",
+        "title": "Smoke across the island",
+        "text": "In October 2015, as land burned in Merauke and Mappi, the smoke drifted hundreds of kilometres north and visibility at some Papuan airports fell to 150 metres. Even in Manokwari, on the far side of the island, officials traced almost 80 percent of the smog back to Merauke.",
+        "art": "haze"
+      },
+      {
+        "frame": 72,
+        "slice": "2024-2025",
+        "title": "South Papua and Merauke",
+        "text": "In 2023, South Papua recorded about 151,000 hectares burned, the third-largest total in the country. Since 2024, a state food estate of more than 2 million hectares, mostly on Indigenous land whose owners oppose it, has been clearing forest around Merauke. By August 2026, as we built this jukebox, about 60,000 hectares had burned inside it. Even so, Papua was left out of the firefighting priorities.",
+        "art": "flames"
+      }
+    ]
+  }
+}
+

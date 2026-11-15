@@ -4,8 +4,11 @@ import { projection, type Placement, type View } from './projection'
 
 /** The CO switch's purple. */
 const CO_RGB = '146,79,191'
-/** Contour levels in ppb, from the outer, faint ring to the bright core. */
-export const CO_LEVELS = [250, 400, 600, 800]
+/**
+ * Contour levels in ppb, from the outer, faint ring to the bright core. A clean month sits near
+ * 60–75 ppb; MERRA-2 regional means reached ~180 ppb over Kalimantan in September 2019.
+ */
+export const CO_LEVELS = [85, 105, 130, 160]
 
 /** Thin the CO when zoomed in, matching the aerosol smoke. */
 const zoomFade = (k: number) => 1 / (1 + 0.15 * (k - 1))

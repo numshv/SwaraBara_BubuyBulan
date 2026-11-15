@@ -5,7 +5,8 @@ import styles from './Legend.module.css'
 const STEPS = ['#b8361a', '#eb5a2d', '#ff8c3c', '#ffc86e', '#fff0cd']
 const TICKS = [300, 315, 330, 345, 360, 367]
 
-const AOD_TICKS = ['0', '1', '2', '3+']
+/** Smoke opacity is linear in organic-carbon AOT; ~0.3 is the 2019 crisis peak. */
+const AOD_TICKS = ['0', '0.1', '0.2', '0.3+']
 const OCEAN_TICKS = ['−2 wetter', '0', '+2 drier']
 
 /** Radii roughly match the drawn dots at the national zoom. */
@@ -54,8 +55,8 @@ export function Legend() {
 
       <figure className={styles.scale}>
         <figcaption>
-          Aerosol optical depth
-          <span className="sr-only">: smoke haze from clear at 0 to thick at 3 or more.</span>
+          Aerosol optical thickness (organic carbon)
+          <span className="sr-only">: smoke haze from clear at 0 to thick at 0.3 or more.</span>
         </figcaption>
         <div className={styles.haze} aria-hidden="true" />
         <div className={styles.ticks} aria-hidden="true">
@@ -70,7 +71,7 @@ export function Legend() {
       <figure className={styles.scale}>
         <figcaption>
           Carbon monoxide (ppb)
-          <span className="sr-only">: purple contour lines at 250, 400, 600 and 800 parts per billion, brighter towards the core.</span>
+          <span className="sr-only">: purple contour lines at {CO_LEVELS.join(', ')} parts per billion, brighter towards the core.</span>
         </figcaption>
         <ul className={styles.contours} aria-hidden="true">
           {CO_LEVELS.map((level, i) => (

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react'
 import { AnnouncerProvider, useAnnounce } from './a11y/Announcer'
-import { readingSeconds, speak, stopSpeaking } from './a11y/speech'
+import { speak, stopSpeaking } from './a11y/speech'
 import { REPO_URL } from './config'
 import { HelpDialog, SettingsDialog } from './components/Dialogs'
 import { EndOverlay } from './components/EndOverlay'
@@ -15,11 +15,13 @@ import { INTRO_STEPS, PLAY_STEPS, Tour } from './components/Tour'
 import { describeHaze, getAerosol, type AerosolField } from './data/aerosol'
 import { getClimate, type ClimateSeries } from './data/climate'
 import { getCo, type CoField } from './data/co'
-import { getSongs, type SongData } from './data/generate'
+import { loadSongs, type SongData } from './data/generate'
 import { CUES, INTRO_TEXT, cueIndexAt, type Cue } from './data/narration'
 import { REGIONS, REGION_BY_ID, songName, songTitle, type RegionId, type SongId } from './data/regions'
 import { MONTH_COUNT, clampFrame, frameLabel, frameMonth, formatNumber } from './data/time'
 import { MapView } from './map/MapView'
+import { audioEngine } from './sound/audioEngine'
+import { narrationUrl, sliceIndexAt, toggleLinkedLayers } from './sound/manifest'
 import { glide } from './sound/meters'
 import { usePrefs, useReducedMotion, type Prefs } from './prefs'
 import { clockReducer, initialClock, type ClockState } from './timeline/clock'
@@ -51,7 +53,7 @@ function monthSummary(song: SongData, aerosol: AerosolField, co: CoField, climat
   const where = f.topProvince ? `, most in ${f.topProvince}` : ''
   const haze = describeHaze(aerosol.peaks[song.id][i])
   const sign = (v: number) => `${v > 0 ? 'plus ' : v < 0 ? 'minus ' : ''}${Math.abs(v).toFixed(1)}`
-  return `${frameLabel(frame)}: ${formatNumber(f.detections)} fire spots${where}. ${haze}. Carbon monoxide up to ${co.peaks[song.id][i]} ppb. ENSO ${sign(climate.oni[i])}, IOD ${sign(climate.iod[i])}.`
+  return `${frameLabel(frame)}: ${formatNumber(f.detections)} fire spots${where}. ${haze}. Carbon monoxide ${Math.round(co.values[song.id][i])} ppb. ENSO ${sign(climate.enso[i])}, IOD ${sign(climate.iod[i])}.`
 }
 
 function Experience({ prefs, update }: { prefs: Prefs; update: (p: Partial<Prefs>) => void }) {
@@ -68,18 +70,29 @@ function Experience({ prefs, update }: { prefs: Prefs; update: (p: Partial<Prefs
   const [dialog, setDialog] = useState<DialogId | null>(null)
   const [holding, setHolding] = useState(false)
   const [endDismissed, setEndDismissed] = useState(false)
+  const [seekSeq, setSeekSeq] = useState(0)
 
   const savedNational = useRef<ClockState | null>(null)
   const lastCue = useRef(-1)
   const lastMonth = useRef(-1)
   const playAfterTour = useRef(false)
-  const holdTimer = useRef(0)
+  const latestT = useRef(clock.t)
+  latestT.current = clock.t
+  const latestSpeed = useRef(clock.speed)
+  latestSpeed.current = clock.speed
+  const latestLayers = useRef(layers)
+  latestLayers.current = layers
   const titleRef = useRef<HTMLHeadingElement>(null)
 
-  // Generating ~10k dummy dots takes a moment; let the page paint first.
+  // The VIIRS fire file loads as its own chunk; the page paints first.
   useEffect(() => {
-    const id = window.setTimeout(() => setSongs(getSongs()), 30)
-    return () => window.clearTimeout(id)
+    let alive = true
+    void loadSongs().then((s) => {
+      if (alive) setSongs(s)
+    })
+    return () => {
+      alive = false
+    }
   }, [])
 
   useEffect(() => {
@@ -88,51 +101,118 @@ function Experience({ prefs, update }: { prefs: Prefs; update: (p: Partial<Prefs
 
   const cues = CUES[song]
   const cueIdx = cueIndexAt(cues, clock.t)
+  const sliceIdx = sliceIndexAt(song, clock.t)
   const data = songs?.[song]
   const frame = data?.frames[clampFrame(clock.t)]
   // The haze field is national; island views read the same grid, zoomed in.
-  const aerosol = useMemo(() => (songs ? getAerosol(songs.indonesia.frames) : null), [songs])
+  const aerosol = useMemo(() => (songs ? getAerosol() : null), [songs])
   const climate = getClimate()
-  const co = useMemo(() => (songs && aerosol ? getCo(songs.indonesia.frames, aerosol.wind) : null), [songs, aerosol])
+  const co = useMemo(() => (songs ? getCo() : null), [songs])
 
-  // Playback loop.
+  const handleSliceEnd = useCallback(
+    (endFrame: number) => {
+      audioEngine.stopStems()
+      if (endFrame >= MONTH_COUNT) {
+        const hasClosingCue = cues.some((c) => c.frame >= MONTH_COUNT)
+        if (hasClosingCue && lastCue.current < cues.length - 1) {
+          dispatch({ type: 'seek', t: MONTH_COUNT })
+        } else {
+          dispatch({ type: 'tick', dt: MONTH_COUNT })
+        }
+      } else {
+        dispatch({ type: 'seek', t: endFrame })
+      }
+    },
+    [cues],
+  )
+
+  // Playback loop synchronized to active Web Audio stem clock.
   const running = clock.playing && !holding && !tour
   useEffect(() => {
     if (!running) return
     let raf = 0
     let prev = performance.now()
     const loop = (now: number) => {
-      dispatch({ type: 'tick', dt: Math.min(0.1, (now - prev) / 1000) })
+      const sync = audioEngine.getSyncState()
+      if (sync) {
+        if (!sync.loading) {
+          if (sync.sliceEnded) {
+            handleSliceEnd(sync.endFrame)
+          } else {
+            dispatch({ type: 'seek', t: sync.t })
+          }
+        }
+      } else if (latestT.current < MONTH_COUNT) {
+        dispatch({ type: 'tick', dt: Math.min(0.1, (now - prev) / 1000) })
+      }
       prev = now
       raf = requestAnimationFrame(loop)
     }
     raf = requestAnimationFrame(loop)
     return () => cancelAnimationFrame(raf)
-  }, [running])
+  }, [running, handleSliceEnd])
+
+  // Start the 6 synchronized stems for the current slice whenever active playback runs.
+  useEffect(() => {
+    if (!running) {
+      audioEngine.stopStems()
+      return
+    }
+    if (latestT.current >= MONTH_COUNT) {
+      audioEngine.stopStems()
+      const hasClosingCue = cues.some((c) => c.frame >= MONTH_COUNT)
+      if (!hasClosingCue || lastCue.current >= cues.length - 1) {
+        dispatch({ type: 'tick', dt: MONTH_COUNT })
+      }
+      return
+    }
+    void audioEngine.playSliceStems(
+      song,
+      sliceIdx,
+      latestT.current,
+      latestSpeed.current,
+      latestLayers.current,
+      handleSliceEnd,
+    )
+    return () => audioEngine.stopStems()
+  }, [running, song, sliceIdx, seekSeq, cues, handleSliceEnd])
+
+  // Keep stem mutes and playback rate synced live without restarting stems.
+  useEffect(() => {
+    audioEngine.setLayers(layers)
+  }, [layers])
+
+  useEffect(() => {
+    audioEngine.setSpeed(clock.speed)
+  }, [clock.speed])
 
   const releaseHold = useCallback(() => {
-    window.clearTimeout(holdTimer.current)
+    audioEngine.stopNarration()
     setHolding(false)
   }, [])
 
   const narrate = useCallback(
     (cue: Cue, index: number, hold: boolean) => {
+      audioEngine.stopStems()
+      audioEngine.preloadSlice(song, index)
+      const spoken = `${cue.title}. ${cue.text}`
       if (audioMode) {
-        const message = `Chapter ${index + 1}: ${cue.title}. ${cue.text}`
-        announce(message)
-        if (hold) {
-          setHolding(true)
-          window.clearTimeout(holdTimer.current)
-          holdTimer.current = window.setTimeout(() => setHolding(false), readingSeconds(message) * 1000)
-        }
-      } else {
-        speak(`${cue.title}. ${cue.text}`)
+        announce(`Chapter ${index + 1}: ${spoken}`)
       }
+      if (hold) setHolding(true)
+      audioEngine.playNarration(
+        narrationUrl(song, index),
+        spoken,
+        audioMode || prefs.narrationVoice,
+        () => {
+          if (hold) setHolding(false)
+        },
+      )
     },
-    [announce, audioMode],
+    [announce, audioMode, prefs.narrationVoice, song],
   )
 
-  // Narration fires when playback crosses into a new chapter.
+  // Narration fires when playback crosses into a new chapter (pause stems during narration).
   useEffect(() => {
     if (!clock.playing || lastCue.current === cueIdx) return
     lastCue.current = cueIdx
@@ -179,9 +259,10 @@ function Experience({ prefs, update }: { prefs: Prefs; update: (p: Partial<Prefs
     return () => document.removeEventListener('focusin', onFocus)
   }, [audioMode])
 
-  useEffect(() => () => stopSpeaking(), [])
+  useEffect(() => () => audioEngine.stopAll(), [])
 
   const play = useCallback(() => {
+    audioEngine.unlock()
     if (!unlocked) {
       setUnlocked(true)
       if (!prefs.playTourDone) {
@@ -190,15 +271,15 @@ function Experience({ prefs, update }: { prefs: Prefs; update: (p: Partial<Prefs
         return
       }
     }
-    if (clock.ended) lastCue.current = -1
+    if (clock.ended || clock.t >= MONTH_COUNT) lastCue.current = -1
     dispatch({ type: 'play' })
-  }, [unlocked, prefs.playTourDone, clock.ended])
+  }, [unlocked, prefs.playTourDone, clock.ended, clock.t])
 
   const togglePlay = useCallback(() => {
     if (clock.playing) {
       dispatch({ type: 'pause' })
       releaseHold()
-      stopSpeaking()
+      audioEngine.stopAll()
     } else {
       play()
     }
@@ -211,7 +292,7 @@ function Experience({ prefs, update }: { prefs: Prefs; update: (p: Partial<Prefs
     replaying.current = true
     playAfterTour.current = false
     releaseHold()
-    stopSpeaking()
+    audioEngine.stopAll()
     dispatch({ type: 'pause' })
     setDialog(null)
     setUnlocked(true)
@@ -229,6 +310,7 @@ function Experience({ prefs, update }: { prefs: Prefs; update: (p: Partial<Prefs
       update({ playTourDone: true })
       if (playAfterTour.current) {
         playAfterTour.current = false
+        audioEngine.unlock()
         dispatch({ type: 'play' })
       }
       if (replaying.current) {
@@ -240,22 +322,27 @@ function Experience({ prefs, update }: { prefs: Prefs; update: (p: Partial<Prefs
   }
 
   function seek(t: number) {
+    audioEngine.unlock()
     releaseHold()
     lastCue.current = cueIndexAt(cues, t)
     dispatch({ type: 'seek', t })
+    setSeekSeq((s) => s + 1)
   }
 
   function step(months: number) {
+    audioEngine.unlock()
     releaseHold()
     const t = Math.min(Math.max(Math.floor(clock.t) + months, 0), MONTH_COUNT - 1)
     dispatch({ type: 'step', months })
+    setSeekSeq((s) => s + 1)
     if (data && aerosol && co) announce(monthSummary(data, aerosol, co, climate, t))
   }
 
   // Narrates the chapter landed on, immediately if playing, otherwise once playback resumes.
   function chapter(dir: -1 | 1) {
+    audioEngine.unlock()
     releaseHold()
-    stopSpeaking()
+    audioEngine.stopAll()
     dispatch({ type: 'chapter', dir, frames: cues.map((c) => c.frame) })
     lastCue.current = -1
   }
@@ -264,7 +351,7 @@ function Experience({ prefs, update }: { prefs: Prefs; update: (p: Partial<Prefs
     if (song === id) return
     if (song === 'indonesia') savedNational.current = { ...clock, playing: false }
     releaseHold()
-    stopSpeaking()
+    audioEngine.stopAll()
     setSong(id)
     setEndDismissed(false)
     lastCue.current = -1
@@ -277,7 +364,7 @@ function Experience({ prefs, update }: { prefs: Prefs; update: (p: Partial<Prefs
   function backToIndonesia() {
     if (song === 'indonesia') return
     releaseHold()
-    stopSpeaking()
+    audioEngine.stopAll()
     const restored = savedNational.current ?? initialClock
     setSong('indonesia')
     setEndDismissed(false)
@@ -299,9 +386,15 @@ function Experience({ prefs, update }: { prefs: Prefs; update: (p: Partial<Prefs
   }
 
   function toggleLayer(id: LayerId) {
-    const on = !layers[id]
-    setLayers((l) => ({ ...l, [id]: on }))
-    announce(`${LAYER_NAMES[id]} layer ${on ? 'on' : 'muted'}.`)
+    const next = toggleLinkedLayers(layers, id)
+    setLayers(next)
+    audioEngine.setLayers(next)
+    const on = next[id]
+    if (id === 'elnino' || id === 'iod') {
+      announce(`El Niño and IOD (Jenglong) ${on ? 'on' : 'muted'}.`)
+    } else {
+      announce(`${LAYER_NAMES[id]} layer ${on ? 'on' : 'muted'}.`)
+    }
   }
 
   // Global keyboard shortcuts. A ref keeps the listener stable while reading fresh state.
@@ -322,6 +415,7 @@ function Experience({ prefs, update }: { prefs: Prefs; update: (p: Partial<Prefs
       case ' ':
         if (onControl) return
         e.preventDefault()
+        audioEngine.unlock()
         if (holding) releaseHold()
         else togglePlay()
         break
@@ -336,6 +430,7 @@ function Experience({ prefs, update }: { prefs: Prefs; update: (p: Partial<Prefs
         break
       case 'n':
       case 'N':
+        audioEngine.unlock()
         narrate(cues[cueIdx], cueIdx, clock.playing)
         break
       case '?':
@@ -438,7 +533,7 @@ function Experience({ prefs, update }: { prefs: Prefs; update: (p: Partial<Prefs
             coOn={layers.co}
             dramatic={true}
             oceans={{
-              enso: layers.elnino ? glide(climate.oni, clock.t) : null,
+              enso: layers.elnino ? glide(climate.enso, clock.t) : null,
               iod: layers.iod ? glide(climate.iod, clock.t) : null,
             }}
             reducedMotion={reducedMotion}
@@ -456,8 +551,8 @@ function Experience({ prefs, update }: { prefs: Prefs; update: (p: Partial<Prefs
               <SoundLayers
                 layers={layers}
                 frames={data.frames}
-                aerosolPeaks={aerosol.peaks[song]}
-                coPeaks={co.peaks[song]}
+                aot={aerosol.series[song]}
+                co={co.values[song]}
                 climate={climate}
                 t={clock.t}
                 playing={running}
@@ -493,6 +588,7 @@ function Experience({ prefs, update }: { prefs: Prefs; update: (p: Partial<Prefs
           national={national}
           reducedMotion={reducedMotion}
           onReplay={() => {
+            audioEngine.unlock()
             setEndDismissed(true)
             lastCue.current = -1
             dispatch({ type: 'play' })

@@ -43,8 +43,9 @@ export function HelpDialog({ open, onClose, onReplay }: HelpProps) {
   return (
     <Modal open={open} title="Help" onClose={onClose}>
       <p className={styles.note}>
-        A silent mockup of the wildfire sonification. Every number is dummy data, generated to look like NASA FIRMS VIIRS
-        detections.
+        Built from NASA data, 2018–2025: NASA FIRMS VIIRS (NOAA-20) fire detections, MERRA-2 organic-carbon aerosol
+        optical thickness and carbon monoxide, and ENSO / IOD indices from NASA sea-level data. Each map dot stands for 60
+        detections. Burned area and respiratory-infection totals are approximate yearly figures, not satellite data.
       </p>
       <div className={styles.row}>
         <button type="button" className="btn" onClick={() => onReplay('intro')}>

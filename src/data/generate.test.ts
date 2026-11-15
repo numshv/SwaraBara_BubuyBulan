@@ -1,20 +1,22 @@
 import { describe, expect, it } from 'vitest'
-import { cumulativeAt, generateAll } from './generate'
+import fires from './real/fires.json'
+import { DETECTIONS_PER_DOT, buildSongs, cumulativeAt, type FireSource } from './generate'
+import { provinces } from './geo'
 import { REGIONS } from './regions'
 import { MONTH_COUNT, frameYear } from './time'
 
-const songs = generateAll()
+const src = fires as unknown as FireSource
+const songs = buildSongs(src, provinces.map((p) => p.properties.region))
 const national = songs.indonesia
 
-describe('generateAll', () => {
+describe('real VIIRS fire songs', () => {
   it('covers 96 months for every song', () => {
     for (const song of Object.values(songs)) expect(song.frames).toHaveLength(MONTH_COUNT)
   })
 
-  it('is deterministic for a seed', () => {
-    const again = generateAll()
-    expect(again.indonesia.totalDetections).toBe(national.totalDetections)
-    expect(again.kalimantan.frames[20].dots[0]).toEqual(songs.kalimantan.frames[20].dots[0])
+  it('keeps every one of the ~1.1M VIIRS detections in the counts', () => {
+    expect(national.totalDetections).toBeGreaterThan(1_100_000)
+    expect(src.perDot).toBe(DETECTIONS_PER_DOT)
   })
 
   it('national detections equal the sum of the regions', () => {
@@ -22,6 +24,11 @@ describe('generateAll', () => {
       const sum = REGIONS.reduce((s, r) => s + songs[r.id].frames[f].detections, 0)
       expect(national.frames[f].detections).toBe(sum)
     }
+  })
+
+  it('draws about one dot per DETECTIONS_PER_DOT detections', () => {
+    const dots = national.frames.reduce((s, f) => s + f.dots.length, 0)
+    expect(dots).toBeCloseTo(national.totalDetections / DETECTIONS_PER_DOT, -2)
   })
 
   it('island songs only contain their own dots', () => {
@@ -33,30 +40,25 @@ describe('generateAll', () => {
   it('peaks in the 2019 and 2023 El Niño years and dips in 2020–2022', () => {
     const y = national.yearDetections
     expect(y[2019]).toBeGreaterThan(y[2018] * 2)
-    expect(y[2023]).toBeGreaterThan(y[2018] * 1.5)
-    for (const quiet of [2020, 2021, 2022]) expect(y[quiet]).toBeLessThan(y[2018])
+    expect(y[2023]).toBeGreaterThan(y[2018])
+    for (const quiet of [2020, 2021, 2022]) expect(y[quiet]).toBeLessThan(y[2018] / 2)
   })
 
-  it('peaks in the August–October dry season', () => {
-    const sept2019 = national.frames[20].detections
-    const feb2019 = national.frames[13].detections
-    expect(sept2019).toBeGreaterThan(feb2019 * 2)
-  })
-
-  it('accumulates counters to roughly 4.4M ha and 2.1M ARI cases', () => {
-    expect(national.cumulativeHectares[MONTH_COUNT]).toBeCloseTo(4_400_000, -3)
-    expect(national.cumulativeAri[MONTH_COUNT]).toBeCloseTo(2_100_000, -3)
+  it('accumulates island counters to the national total', () => {
     const islandSum = REGIONS.reduce((s, r) => s + songs[r.id].cumulativeHectares[MONTH_COUNT], 0)
     expect(islandSum).toBeCloseTo(national.cumulativeHectares[MONTH_COUNT], -1)
   })
 
-  it('produces FIRMS-shaped dots on land', () => {
-    const d = national.frames[20].dots[0]
+  it('dots carry the real VIIRS columns, sorted within the month', () => {
+    const frame = national.frames[20]
+    const d = frame.dots[0]
     expect(d.acq_date.startsWith(String(frameYear(20)))).toBe(true)
-    expect(['l', 'n', 'h']).toContain(d.confidence)
-    expect(d.bright_ti4).toBeLessThanOrEqual(367)
+    expect(d.bright_ti4).toBeGreaterThan(200)
+    expect(d.bright_ti5).toBeGreaterThan(200)
     expect(d.frp).toBeGreaterThan(0)
     expect(d.province).toBeTruthy()
+    for (let i = 1; i < frame.dots.length; i++) expect(frame.dots[i].offset).toBeGreaterThanOrEqual(frame.dots[i - 1].offset)
+    for (const dd of frame.dots) expect(dd.frp).toBeLessThanOrEqual(frame.peakFrp)
   })
 })
 

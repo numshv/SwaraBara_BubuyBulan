@@ -60,10 +60,9 @@ export function AudioGuide({ stage, onDone }: { stage: 'intro' | 'play'; onDone:
           <p className={styles.p}>Playback is about to start. These parts of the page are now available:</p>
           <ol className={styles.list}>
             <li>
-              Narration panel. Each chapter is read to you and the timeline waits until it&apos;s done. Press Space to continue
-              early, or N to hear it again.
+              Narration panel. Each chapter is read aloud while instruments pause, and the timeline resumes into the matching sound slice once it finishes. Press Space to continue early, or N to hear it again.
             </li>
-            <li>Sound layers: Wildfire, Aerosol, El Niño, IOD and CO switches. Each says which gamelan instrument plays it and its value this month, and switching one off also hides it on the map.</li>
+            <li>Sound layers: Wildfire (Peking &amp; Panerus), Aerosol (Bonang), CO (Rebab), and linked El Niño / IOD switches (Jenglong). Switching a layer off mutes that instrument and hides it on the map. Goong marks every 1-year interval.</li>
             <li>A legend that explains the fire dots on the map.</li>
           </ol>
         </>

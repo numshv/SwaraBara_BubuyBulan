@@ -22,7 +22,7 @@
  */
 .row {
   display: grid;
-  grid-template-columns: 26px 5.2em minmax(0, 1fr) auto;
+  grid-template-columns: 26px 7.6em minmax(0, 1fr) auto;
   grid-template-areas:
     'pill name name value'
     '. instrument meter meter';
@@ -34,6 +34,12 @@
   text-align: left;
   background: none;
   border: 0;
+}
+
+.note {
+  margin: 2px 0 0;
+  font-size: 0.72rem;
+  color: var(--text-faint);
 }
 
 /* Solid track, no outline (see .scratch/toggle-example.png): grey when off, layer colour when on. */

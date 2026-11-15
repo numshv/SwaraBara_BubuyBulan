@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { generateClimate } from '../data/climate'
+import { getClimate } from '../data/climate'
 import { MONTH_COUNT } from '../data/time'
 import { busyEnvelope, envelope, glide, hitLevel, normalise, type MeterEvent } from './meters'
 
@@ -47,21 +47,21 @@ describe('glide and normalise', () => {
   })
 })
 
-describe('generateClimate', () => {
-  const c = generateClimate()
+describe('real ENSO / IOD series', () => {
+  const c = getClimate()
 
   it('covers 96 months', () => {
-    for (const s of [c.oni, c.iod]) expect(s).toHaveLength(MONTH_COUNT)
+    for (const s of [c.enso, c.iod]) expect(s).toHaveLength(MONTH_COUNT)
   })
 
-  it('has La Niña in 2021 and a strong El Niño late in 2023', () => {
-    expect(Math.max(...c.oni.slice(36, 48))).toBeLessThan(0)
-    expect(Math.max(...c.oni.slice(66, 74))).toBeGreaterThan(1.5)
+  it('has La Niña in 2021 and El Niño late in 2023', () => {
+    expect(Math.max(...c.enso.slice(36, 48))).toBeLessThan(0)
+    expect(Math.max(...c.enso.slice(66, 74))).toBeGreaterThan(0.5)
   })
 
-  it('has a strong positive IOD in 2019, negative 2021–22 and positive 2023', () => {
-    expect(Math.max(...c.iod.slice(18, 24))).toBeGreaterThan(1.5)
+  it('has a strong positive IOD in 2019 and 2023, negative in 2021–22', () => {
+    expect(Math.max(...c.iod.slice(18, 24))).toBeGreaterThan(2)
     expect(Math.min(...c.iod.slice(40, 58))).toBeLessThan(-0.7)
-    expect(Math.max(...c.iod.slice(66, 72))).toBeGreaterThan(1.2)
+    expect(Math.max(...c.iod.slice(66, 72))).toBeGreaterThan(2)
   })
 })

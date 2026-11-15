@@ -81,7 +81,7 @@ export class SmokeRenderer {
     this.weightsT = t
     this.totalWeight = 0
     for (let k = 0; k < this.weights.length; k++) {
-      const v = aodBlend(this.field, t, k) - PUFF_THRESHOLD
+      const v = aodBlend(this.field, t, k) * this.field.visualScale - PUFF_THRESHOLD
       const w = v > 0 ? Math.pow(v, 1.3) : 0
       this.weights[k] = w
       this.totalWeight += w
@@ -98,7 +98,7 @@ export class SmokeRenderer {
     const img = rctx.createImageData(NX, NY)
     for (let j = 0; j < NY; j++) {
       for (let i = 0; i < NX; i++) {
-        const aod = aodBlend(this.field, t, cellIndex(i, j))
+        const aod = aodBlend(this.field, t, cellIndex(i, j)) * this.field.visualScale
         // Canvas rows run north to south; the grid runs south to north.
         const o = ((NY - 1 - j) * NX + i) * 4
         const [r, g, b] = this.dramatic ? SMOKE_DRAMATIC : SMOKE
@@ -143,7 +143,7 @@ export class SmokeRenderer {
       let r = Math.random() * total
       let k = 0
       while (k < this.weights.length - 1 && r > this.weights[k]) r -= this.weights[k++]
-      const aod = aodBlend(this.field, t, k)
+      const aod = aodBlend(this.field, t, k) * this.field.visualScale
       const i = k % NX
       const j = Math.floor(k / NX)
       this.puffs.push({

@@ -22,3 +22,7 @@ Applies on top of `.scratch/sound-layer-meters/grill-summary.md`. User approved 
 
 ## Out of scope
 - Real ENSO/IOD data, SST maps, per-region effects.
+
+## Legend (added 2026-11-15)
+- One combined entry, "El Niño (east) · IOD (west)": both use the same edge glow and colours, only the side differs. Diverging bar blue → clear → orange with ticks "−2 wetter · 0 · +2 drier".
+- Legend is a single column (power, brightness, aerosol, CO, El Niño · IOD) that **floats** over the bottom-left corner (absolute, above the map), so it never takes height from the map. The narration column keeps 170px clear at its bottom for it (long text scrolls). Normal flow again in the stacked layout below 1024px.

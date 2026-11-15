@@ -1,16 +1,15 @@
-/* Radiative power, fire brightness, aerosol and CO stacked in one column. */
+/* One column: radiative power, brightness, aerosol, CO, then El Niño / IOD. */
 .legend {
   display: grid;
   justify-items: start;
-  gap: 14px;
+  gap: 10px;
   font-size: 0.72rem;
   color: var(--text-faint);
 }
 
-
 .scale {
   display: grid;
-  gap: 6px;
+  gap: 4px;
   margin: 0;
 }
 
@@ -40,6 +39,13 @@
   background: linear-gradient(90deg, rgba(196, 188, 176, 0.04), rgba(196, 188, 176, 0.55));
 }
 
+/* Diverging, like the edge glow: cool blue (wetter) through clear to warm orange (drier). */
+.ocean {
+  width: 220px;
+  height: 8px;
+  background: linear-gradient(90deg, rgb(70 120 210 / 0.9), rgb(70 120 210 / 0.05) 50%, rgb(232 96 48 / 0.05) 50%, rgb(232 96 48 / 0.9));
+}
+
 /* Spans its figure, which is as wide as the bar above it. */
 .ticks {
   position: relative;
@@ -51,6 +57,7 @@
   position: absolute;
   transform: translateX(-50%);
   line-height: 1;
+  white-space: nowrap;
   font-variant-numeric: tabular-nums;
 }
 

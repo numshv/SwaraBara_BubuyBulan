@@ -6,6 +6,7 @@ const STEPS = ['#b8361a', '#eb5a2d', '#ff8c3c', '#ffc86e', '#fff0cd']
 const TICKS = [300, 315, 330, 345, 360, 367]
 
 const AOD_TICKS = ['0', '1', '2', '3+']
+const OCEAN_TICKS = ['−2 wetter', '0', '+2 drier']
 
 /** Radii roughly match the drawn dots at the national zoom. */
 const SIZES = [
@@ -79,6 +80,25 @@ export function Legend() {
             </li>
           ))}
         </ul>
+      </figure>
+
+      {/* One entry for both: same edge glow and colours, only the side differs. */}
+      <figure className={styles.scale}>
+        <figcaption>
+          El Niño (east) · IOD (west)
+          <span className="sr-only">
+            : glow at the map edges. Blue means the ocean pushes Indonesia wetter, orange means drier; stronger colour, stronger
+            signal, from minus 2 to plus 2.
+          </span>
+        </figcaption>
+        <div className={styles.ocean} aria-hidden="true" />
+        <div className={styles.ticks} aria-hidden="true">
+          {OCEAN_TICKS.map((label, i) => (
+            <span key={label} style={{ left: `${(i / (OCEAN_TICKS.length - 1)) * 100}%` }}>
+              {label}
+            </span>
+          ))}
+        </div>
       </figure>
     </section>
   )

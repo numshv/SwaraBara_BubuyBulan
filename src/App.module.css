@@ -1,4 +1,5 @@
 .app {
+  --legend-clearance: 170px;
   height: 100%;
   min-height: 640px;
   display: grid;
@@ -121,6 +122,11 @@
   min-width: 0;
 }
 
+/* Keep the narration clear of the floating legend below it; long text scrolls instead. */
+.app[data-unlocked] .main > aside {
+  padding-bottom: var(--legend-clearance);
+}
+
 .mapArea {
   grid-column: 2;
   position: relative;
@@ -195,6 +201,20 @@
 
 .bottomSide:last-of-type {
   justify-self: end;
+}
+
+/* Out of flow: anchored to the bottom-left, growing upwards over the (vignetted) map edge. */
+.legendSlot {
+  position: relative;
+  align-self: end;
+  height: 0;
+}
+
+.legendSlot > * {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  z-index: 3;
 }
 
 /* Legend and sound layers arrive just after the narration column opens. */
@@ -286,5 +306,17 @@
 
   .bottomSide:first-child {
     order: 5;
+  }
+
+  .legendSlot {
+    height: auto;
+  }
+
+  .legendSlot > * {
+    position: static;
+  }
+
+  .app[data-unlocked] .main > aside {
+    padding-bottom: 0;
   }
 }

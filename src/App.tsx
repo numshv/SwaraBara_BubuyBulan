@@ -426,7 +426,8 @@ function Experience({ prefs, update }: { prefs: Prefs; update: (p: Partial<Prefs
       </main>
 
       <footer className={styles.bottom}>
-        <div className={styles.bottomSide}>{unlocked && <Legend />}</div>
+        {/* The legend floats over the bottom-left corner, so it never takes height from the map. */}
+        <div className={`${styles.bottomSide} ${styles.legendSlot}`}>{unlocked && <Legend />}</div>
         <Player
           clock={clock}
           songLabel={`${songName(song)}'s fire story`}

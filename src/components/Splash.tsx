@@ -13,10 +13,12 @@ export function Splash({ onDone }: { onDone: () => void }) {
     const done = window.setTimeout(onDone, SHOW_MS + FADE_MS)
     const skip = () => setLeaving(true)
     window.addEventListener('keydown', skip)
+    window.addEventListener('pointerdown', skip)
     return () => {
       window.clearTimeout(fade)
       window.clearTimeout(done)
       window.removeEventListener('keydown', skip)
+      window.removeEventListener('pointerdown', skip)
     }
   }, [onDone])
 
@@ -28,7 +30,7 @@ export function Splash({ onDone }: { onDone: () => void }) {
   }, [leaving, onDone])
 
   return (
-    <div className={styles.splash} data-leaving={leaving || undefined} onClick={() => setLeaving(true)} role="status">
+    <div className={styles.splash} data-leaving={leaving || undefined} role="status">
       <img src="/spaceappslogo.png" alt="NASA Space Apps Challenge" className={styles.logo} />
       <h1 className={styles.name}>Swara Bara</h1>
       <p className={styles.tagline}>Listening to Indonesia&apos;s wildfires, 2018–2025</p>

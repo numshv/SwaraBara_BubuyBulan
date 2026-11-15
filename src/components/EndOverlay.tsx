@@ -67,7 +67,7 @@ export function EndOverlay({ scope, ari, hectares, national, reducedMotion, onRe
         </div>
       </div>
       <p className={styles.closing}>
-        Behind every dot: {formatCompact(ari)} people struggling to breathe, and {formatCompact(hectares)} hectares lost.
+        Behind every dot: Behind every dot: 1.9 million people gasping for air, and 4.9 million hectares lost to the flames.
       </p>
       <div className={styles.actions}>
         <button ref={replayRef} type="button" className="btn btn-primary" onClick={() => leave(onReplay)}>

@@ -1,5 +1,4 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
-import { formatCompact } from '../data/time'
 import { Counter } from './NarrationPanel'
 import styles from './EndOverlay.module.css'
 
@@ -67,7 +66,7 @@ export function EndOverlay({ scope, ari, hectares, national, reducedMotion, onRe
         </div>
       </div>
       <p className={styles.closing}>
-        Behind every dot: Behind every dot: 1.9 million people gasping for air, and 4.9 million hectares lost to the flames.
+        Behind every dot: 1.9 million people gasping for air, and 4.9 million hectares lost to the flames.
       </p>
       <div className={styles.actions}>
         <button ref={replayRef} type="button" className="btn btn-primary" onClick={() => leave(onReplay)}>

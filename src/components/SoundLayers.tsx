@@ -6,7 +6,7 @@ import { clampFrame, formatNumber } from '../data/time'
 import { busyEnvelope, envelope, glide, hitLevel, normalise, range, type MeterEvent } from '../sound/meters'
 import styles from './SoundLayers.module.css'
 
-export type LayerId = 'wildfire' | 'aerosol' | 'elnino' | 'iod' | 'co2' | 'co' | 'rain'
+export type LayerId = 'wildfire' | 'aerosol' | 'elnino' | 'iod' | 'co'
 export type Layers = Record<LayerId, boolean>
 
 interface LayerDef {
@@ -24,9 +24,7 @@ export const LAYERS: LayerDef[] = [
   { id: 'elnino', name: 'El Niño', instrument: 'Kendang', color: '#efcd57' },
   // Placeholder colour: the palette had no unused colour left.
   { id: 'iod', name: 'IOD', instrument: 'Slenthem', color: '#4fa3bf' },
-  { id: 'co2', name: 'CO₂', instrument: 'Gender', color: '#349800' },
   { id: 'co', name: 'CO', instrument: 'Saron', color: '#924fbf' },
-  { id: 'rain', name: 'Rain', instrument: 'Suling', color: '#5a4fbf' },
 ]
 
 export const LAYER_NAMES = Object.fromEntries(LAYERS.map((l) => [l.id, l.name])) as Record<LayerId, string>
@@ -37,9 +35,8 @@ function knobFor(hex: string): string {
   return 0.2126 * r + 0.7152 * g + 0.0722 * b > 0.55 ? '#161616' : '#ffffff'
 }
 
-/** Decay times in months: fire hits fade fast, rain bursts a little faster. */
+/** Decay time in months: fire hits fade fast. */
 const FIRE_TAU = 0.05
-const RAIN_TAU = 0.03
 
 interface Props {
   layers: Layers
@@ -56,19 +53,14 @@ export function SoundLayers({ layers, frames, aerosolPeaks, climate, t, playing,
   // Per-song scales, so every meter spans its own 2018–2025 range.
   const scales = useMemo(() => {
     const fireEvents: MeterEvent[][] = frames.map((fr) => fr.dots.map((d) => ({ offset: d.offset, w: Math.sqrt(d.frp) })))
-    const rainEvents: MeterEvent[][] = climate.rainDays.map((m) => m.map((r) => ({ offset: r.offset, w: r.size })))
     return {
       fireEvents,
-      rainEvents,
       fireBusy: busyEnvelope(fireEvents, FIRE_TAU),
-      rainBusy: busyEnvelope(rainEvents, RAIN_TAU),
       detections: range(frames.map((fr) => fr.detections)),
       aod: range(aerosolPeaks.map((p) => p.aod)),
       co: range(frames.map((fr) => fr.co)),
       oni: range(climate.oni),
       iod: range(climate.iod),
-      co2: range(climate.co2),
-      rain: range(climate.rain),
     }
   }, [frames, aerosolPeaks, climate])
 
@@ -83,10 +75,6 @@ export function SoundLayers({ layers, frames, aerosolPeaks, climate, t, playing,
         return reducedMotion
           ? normalise(glide(frames.map((fr) => fr.detections), t), scales.detections)
           : hitLevel(envelope(scales.fireEvents, t, FIRE_TAU), scales.fireBusy)
-      case 'rain':
-        return reducedMotion
-          ? normalise(glide(climate.rain, t), scales.rain)
-          : hitLevel(envelope(scales.rainEvents, t, RAIN_TAU), scales.rainBusy)
       case 'aerosol':
         return normalise(glide(aerosolPeaks.map((p) => p.aod), t), scales.aod) + wobble(0.04, 19, 0)
       case 'co':
@@ -95,8 +83,6 @@ export function SoundLayers({ layers, frames, aerosolPeaks, climate, t, playing,
         return normalise(glide(climate.oni, t), scales.oni)
       case 'iod':
         return normalise(glide(climate.iod, t), scales.iod)
-      case 'co2':
-        return normalise(glide(climate.co2, t), scales.co2)
     }
   }
 
@@ -112,9 +98,7 @@ export function SoundLayers({ layers, frames, aerosolPeaks, climate, t, playing,
       short: `${climate.iod[f] > 0 ? '+' : ''}${climate.iod[f].toFixed(1)} DMI`,
       spoken: `Indian Ocean Dipole index ${climate.iod[f].toFixed(1)}`,
     },
-    co2: { short: `${climate.co2[f].toFixed(1)} ppm`, spoken: `${climate.co2[f].toFixed(1)} parts per million` },
     co: { short: `${frame.co} ppb`, spoken: `${frame.co} parts per billion` },
-    rain: { short: `${climate.rain[f]} mm`, spoken: `${climate.rain[f]} millimetres of rain this month` },
   }
 
   return (

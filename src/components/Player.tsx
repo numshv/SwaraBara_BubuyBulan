@@ -22,7 +22,7 @@ export function Player({ clock, songLabel, cues, holding, onToggle, onSeek, onCh
   return (
     <section className={styles.player} aria-label="Player" data-tour="player" id="player">
       <p className={styles.nowPlaying}>
-        <span className={styles.caps}>{clock.playing || clock.t > 0 ? 'Now playing' : 'Up next'}:</span>{' '}
+        <span className={styles.caps}>{clock.playing ? 'Now playing' : clock.t > 0 && !clock.ended ? 'Paused' : 'Up next'}:</span>{' '}
         <span key={holding ? 'hold' : songLabel} className={`${styles.song} appear`} data-holding={holding || undefined}>
           {holding ? 'Paused for narration. Press Space to continue.' : songLabel}
         </span>

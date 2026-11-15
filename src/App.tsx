@@ -52,7 +52,7 @@ function Experience({ prefs, update }: { prefs: Prefs; update: (p: Partial<Prefs
   const [songs, setSongs] = useState<Record<SongId, SongData> | null>(null)
   const [song, setSong] = useState<SongId>('indonesia')
   const [clock, dispatch] = useReducer(clockReducer, initialClock)
-  const [layers, setLayers] = useState<Layers>({ wildfire: true, aerosol: true, elnino: true, iod: true, co2: true, co: true, rain: true })
+  const [layers, setLayers] = useState<Layers>({ wildfire: true, aerosol: true, elnino: true, iod: true, co: true })
   const [unlocked, setUnlocked] = useState(false)
   const [tour, setTour] = useState<Stage | null>(null)
   const [dialog, setDialog] = useState<DialogId | null>(null)
@@ -398,12 +398,12 @@ function Experience({ prefs, update }: { prefs: Prefs; update: (p: Partial<Prefs
             onExploreRegion={exploreRegion}
           />
         </section>
-        {/* Top-right: the month first, sound-layer switches beneath it. */}
-        <div className={styles.side}>
-          <p className={styles.date} aria-hidden="true">
-            {frameLabel(clock.t)}
-          </p>
-          {unlocked && (
+        {/* Top-right, only once the music has started: the month first, sound-layer switches beneath it. */}
+        {unlocked && (
+          <div className={styles.side}>
+            <p className={styles.date} aria-hidden="true">
+              {frameLabel(clock.t)}
+            </p>
             <div className={styles.sideLayers}>
               <SoundLayers
                 layers={layers}
@@ -416,8 +416,8 @@ function Experience({ prefs, update }: { prefs: Prefs; update: (p: Partial<Prefs
                 onToggle={toggleLayer}
               />
             </div>
-          )}
-        </div>
+          </div>
+        )}
       </main>
 
       <footer className={styles.bottom}>

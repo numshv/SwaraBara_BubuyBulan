@@ -204,11 +204,11 @@ export function MapView({
         <canvas
           ref={scarRef}
           className={styles.scars}
-          style={{ opacity: dramatic ? (wildfireOn ? 1 : 0.25) : 0 }}
+          style={{ opacity: dramatic && wildfireOn ? 1 : 0 }}
           aria-hidden="true"
         />
         <canvas ref={smokeRef} className={styles.smoke} style={{ opacity: smokeOn ? 1 : 0 }} aria-hidden="true" />
-        <canvas ref={canvasRef} className={styles.fires} style={{ opacity: wildfireOn ? 1 : 0.25 }} aria-hidden="true" />
+        <canvas ref={canvasRef} className={styles.fires} style={{ opacity: wildfireOn ? 1 : 0 }} aria-hidden="true" />
         {/* Fades the map into the page towards the screen edges, under the surrounding UI. */}
         <div className={styles.vignette} aria-hidden="true" />
         {/* Ocean light: Indian Ocean (IOD) from the west, Pacific (ENSO) from the east. */}

@@ -50,3 +50,7 @@ Applies on top of `.scratch/wildfire-sonification-mockup/grill-summary.md` and `
 ## Outcome (after comparison)
 - Chosen: **b (two lines)** for every row; right column narrowed to 240px (220px on tablet).
 - Per-layer colour on meter fill and switch knob (project palette): Wildfire `#de4a3d`, Aerosol off-white `#e8e4dc`, El Niño `#efcd57`, CO₂ `#349800`, CO `#924fbf`, Rain `#5a4fbf`.
+
+## Final rows (2026-11-15)
+- Sound layer controls are now 5 rows: Wildfire, Aerosol, El Niño, IOD, CO. CO₂ and Rain removed (data, meters and tests dropped).
+- Each switch silences the layer, empties its meter **and hides its map visual completely**: Wildfire → dots, burn scars, hotspot glow, sparks; Aerosol → smoke; El Niño → east-edge glow + label; IOD → west-edge glow + label. CO is sound-only (no map layer).

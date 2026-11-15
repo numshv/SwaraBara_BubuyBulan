@@ -107,7 +107,7 @@
 .main {
   min-height: 0;
   display: grid;
-  grid-template-columns: 0px minmax(0, 1fr) 240px;
+  grid-template-columns: 0px minmax(0, 1fr) 0px;
   column-gap: 32px;
   transition: grid-template-columns var(--t-slow) var(--ease);
 }
@@ -156,8 +156,12 @@
   justify-self: stretch;
 }
 
+.side {
+  animation: rise-in var(--t-base) var(--ease) 300ms backwards;
+}
+
 .sideLayers {
-  animation: rise-in var(--t-base) var(--ease) 350ms backwards;
+  animation: rise-in var(--t-base) var(--ease) 400ms backwards;
 }
 
 /* Sits on a plain hairline. */
@@ -226,7 +230,7 @@
   }
 
   .main {
-    grid-template-columns: 0px minmax(0, 1fr) 220px;
+    grid-template-columns: 0px minmax(0, 1fr) 0px;
   }
 
   .app[data-unlocked] .main {

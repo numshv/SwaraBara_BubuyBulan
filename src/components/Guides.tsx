@@ -63,7 +63,7 @@ export function AudioGuide({ stage, onDone }: { stage: 'intro' | 'play'; onDone:
               Narration panel. Each chapter is read to you and the timeline waits until it&apos;s done. Press Space to continue
               early, or N to hear it again.
             </li>
-            <li>Sound layers: Wildfire, Aerosol, El Niño, CO₂, CO and Rain switches. Each says which gamelan instrument plays it and its value this month.</li>
+            <li>Sound layers: Wildfire, Aerosol, El Niño, IOD and CO switches. Each says which gamelan instrument plays it and its value this month, and switching one off also hides it on the map.</li>
             <li>A legend that explains the fire dots on the map.</li>
           </ol>
         </>

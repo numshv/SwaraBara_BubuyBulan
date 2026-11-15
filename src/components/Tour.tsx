@@ -34,7 +34,7 @@ export const PLAY_STEPS: TourStep[] = [
   {
     target: '[data-tour="layers"]',
     title: 'Sound layers',
-    text: 'Each data set is played by its own gamelan instrument; the bar shows how intense it is right now. Switch layers on or off to hear them separately. Wildfire and Aerosol also show or hide their layer on the map.',
+    text: 'Each data set is played by its own gamelan instrument; the bar shows how intense it is right now. Switching a layer off silences it and hides it on the map: fires, smoke, and the El Niño and IOD glows at the edges of the map.',
   },
   {
     target: '[data-tour="legend"]',

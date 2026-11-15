@@ -1,8 +1,8 @@
 .gate {
   min-height: 100%;
   display: grid;
-  align-content: end;
-  padding: 48px 32px 64px;
+  place-items: center;
+  padding: 48px 24px;
   background: var(--bg);
   animation: fade-in var(--t-slow) var(--ease) backwards;
 }
@@ -14,14 +14,18 @@
 }
 
 .inner {
-  max-width: 760px;
+  width: 100%;
+  max-width: 720px;
   display: grid;
+  justify-items: center;
   gap: 20px;
+  text-align: center;
 }
 
 .kickerRow {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 12px;
   flex-wrap: wrap;
 }
@@ -47,7 +51,7 @@
 }
 
 .title {
-  font-size: clamp(2.2rem, 5vw, 3.6rem);
+  font-size: clamp(2.4rem, 6vw, 4rem);
   font-weight: 500;
   line-height: 1.05;
   letter-spacing: -0.02em;
@@ -55,61 +59,86 @@
 
 .tagline {
   margin: 0;
-  font-size: clamp(1.15rem, 2.2vw, 1.55rem);
+  font-size: clamp(1.1rem, 2.2vw, 1.45rem);
   font-weight: 400;
   color: var(--text-dim);
   letter-spacing: -0.01em;
 }
 
 .lead {
-  margin: 12px 0 0;
+  margin: 16px 0 0;
   color: var(--text-dim);
 }
 
+/* Two equal cards side by side; stacked on narrow screens. */
 .choices {
+  width: 100%;
   display: grid;
-  border-top: 1px solid var(--rule);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
 }
 
-/* Each option is a full-width text row with a hairline rule, not a card. */
 .choice {
   display: grid;
-  grid-template-columns: 1fr auto;
-  gap: 4px 24px;
-  padding: 20px 0;
+  grid-template-rows: auto 1fr auto;
+  gap: 8px;
+  padding: 22px 22px 18px;
   text-align: left;
-  background: none;
-  border: 0;
-  border-bottom: 1px solid var(--rule);
+  background: color-mix(in srgb, var(--text) 3%, transparent);
+  border: 1px solid var(--rule);
+  border-radius: 12px;
+  transition: border-color 150ms ease, background 150ms ease, transform 150ms ease;
 }
 
 .choice::after {
-  content: '→';
-  grid-column: 2;
-  grid-row: 1 / span 2;
-  align-self: center;
+  content: 'Choose →';
+  font-size: 0.8rem;
   color: var(--text-faint);
-  transition: color 150ms ease, transform 150ms ease;
+  transition: color 150ms ease;
+}
+
+.choice:hover,
+.choice:focus-visible {
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 8%, transparent);
+  transform: translateY(-2px);
 }
 
 .choice:hover::after,
 .choice:focus-visible::after {
   color: var(--accent);
-  transform: translateX(4px);
 }
 
 .choiceTitle {
-  font-size: 1.15rem;
+  font-size: 1.1rem;
   font-weight: 500;
 }
 
 .choiceText {
-  font-size: 0.88rem;
+  font-size: 0.86rem;
+  line-height: 1.5;
   color: var(--text-dim);
 }
 
 .note {
-  margin: 0;
+  margin: 4px 0 0;
   font-size: 0.8rem;
   color: var(--text-faint);
+}
+
+@media (max-width: 640px) {
+  .choices {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .choice {
+    transition: none;
+  }
+
+  .choice:hover,
+  .choice:focus-visible {
+    transform: none;
+  }
 }

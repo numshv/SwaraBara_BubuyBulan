@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react'
+import { useCallback, useEffect, useLayoutEffect, useMemo, useReducer, useRef, useState, type CSSProperties } from 'react'
 import { AnnouncerProvider, useAnnounce } from './a11y/Announcer'
 import { speak, stopSpeaking } from './a11y/speech'
 import { REPO_URL } from './config'
@@ -83,6 +83,24 @@ function Experience({ prefs, update }: { prefs: Prefs; update: (p: Partial<Prefs
   const latestLayers = useRef(layers)
   latestLayers.current = layers
   const titleRef = useRef<HTMLHeadingElement>(null)
+  const legendRef = useRef<HTMLDivElement>(null)
+  const footerRef = useRef<HTMLElement>(null)
+  // The legend floats up over the narration column; keep the narration clear of its real height.
+  const [legendClearance, setLegendClearance] = useState<number | null>(null)
+  useLayoutEffect(() => {
+    const legend = legendRef.current?.firstElementChild
+    const footer = footerRef.current
+    if (!legend || !footer) return
+    const measure = () => {
+      const over = legend.getBoundingClientRect().height - footer.getBoundingClientRect().height
+      setLegendClearance(Math.max(0, Math.ceil(over)) + 24)
+    }
+    measure()
+    const ro = new ResizeObserver(measure)
+    ro.observe(legend)
+    ro.observe(footer)
+    return () => ro.disconnect()
+  }, [unlocked, songs])
 
   // The VIIRS fire file loads as its own chunk; the page paints first.
   useEffect(() => {
@@ -457,7 +475,12 @@ function Experience({ prefs, update }: { prefs: Prefs; update: (p: Partial<Prefs
   const showEnd = clock.ended && !endDismissed
 
   return (
-    <div className={styles.app} data-unlocked={unlocked || undefined} data-ended={showEnd || undefined}>
+    <div
+      className={styles.app}
+      data-unlocked={unlocked || undefined}
+      data-ended={showEnd || undefined}
+      style={legendClearance === null ? undefined : ({ '--legend-clearance': `${legendClearance}px` } as CSSProperties)}
+    >
       <a className={styles.skip} href="#player">
         Skip to player
       </a>
@@ -519,6 +542,7 @@ function Experience({ prefs, update }: { prefs: Prefs; update: (p: Partial<Prefs
             index={cueIdx}
             count={cues.length}
             scope={songName(song)}
+            reducedMotion={reducedMotion}
           />
         )}
         <section className={styles.mapArea} aria-label={`Fire map of ${songName(song)}, ${frameLabel(clock.t)}`}>
@@ -564,9 +588,9 @@ function Experience({ prefs, update }: { prefs: Prefs; update: (p: Partial<Prefs
         )}
       </main>
 
-      <footer className={styles.bottom}>
+      <footer ref={footerRef} className={styles.bottom}>
         {/* The legend floats over the bottom-left corner, so it never takes height from the map. */}
-        <div className={`${styles.bottomSide} ${styles.legendSlot}`}>{unlocked && <Legend />}</div>
+        <div ref={legendRef} className={`${styles.bottomSide} ${styles.legendSlot}`}>{unlocked && <Legend />}</div>
         <Player
           clock={clock}
           songLabel={`${songName(song)}'s fire story`}

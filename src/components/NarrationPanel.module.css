@@ -39,7 +39,56 @@
 .text {
   margin: 0;
   font-size: 0.88rem;
+  line-height: 1.55;
   color: var(--text-dim);
+  /* Room for a typical two-sentence passage, so the dots below don't jump while typing. */
+  min-height: 6.2em;
+  animation: passage-in var(--t-base) var(--ease);
+}
+
+/* Blinking caret while a passage types out. */
+.text[data-typing]::after {
+  content: '';
+  display: inline-block;
+  width: 2px;
+  height: 1em;
+  margin-left: 2px;
+  vertical-align: -0.12em;
+  background: var(--accent);
+  animation: caret 0.9s steps(1) infinite;
+}
+
+.passages {
+  display: flex;
+  gap: 5px;
+}
+
+.passages span {
+  width: 14px;
+  height: 2px;
+  border-radius: 1px;
+  background: var(--rule-strong);
+  transition: background var(--t-base) var(--ease);
+}
+
+.passages span[data-done] {
+  background: var(--text-faint);
+}
+
+.passages span[data-on] {
+  background: var(--accent);
+}
+
+@keyframes caret {
+  50% {
+    opacity: 0;
+  }
+}
+
+@keyframes passage-in {
+  from {
+    opacity: 0;
+  }
 }
 
 
@@ -98,5 +147,12 @@
 @keyframes fade-in {
   from {
     opacity: 0;
+  }
+}
+
+/* Short screens: drop the illustration so the passage keeps its room above the legend. */
+@media (max-height: 820px) and (min-width: 1024px) {
+  .story :global(.art) {
+    display: none;
   }
 }

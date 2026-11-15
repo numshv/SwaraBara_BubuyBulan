@@ -30,6 +30,10 @@ class SoundEngine {
   private narrationAudio: HTMLAudioElement | null = null
   private narrationTimer = 0
   private narrationToken = 0
+  /** performance.now() when the current narration started, and its estimated length (text fallback). */
+  private narrationStart = 0
+  private narrationEstimateSec = 0
+  private narrationActive = false
   private stemToken = 0
 
   private anchor: StemAnchor | null = null
@@ -146,9 +150,25 @@ class SoundEngine {
     this.activeSources = []
   }
 
+  /**
+   * How far the current narration has played, 0–1, or null when none is playing.
+   * Uses the audio file's own clock when available, otherwise elapsed time over the reading estimate.
+   */
+  getNarrationProgress(): number | null {
+    if (!this.narrationActive) return null
+    const a = this.narrationAudio
+    if (a) {
+      if (!Number.isFinite(a.duration) || a.duration <= 0) return 0
+      return Math.min(1, a.currentTime / a.duration)
+    }
+    const elapsed = (performance.now() - this.narrationStart) / 1000
+    return Math.min(1, elapsed / Math.max(1, this.narrationEstimateSec))
+  }
+
   /** Stop active narration audio & browser speech immediately. */
   stopNarration(): void {
     this.narrationToken += 1
+    this.narrationActive = false
     window.clearTimeout(this.narrationTimer)
     this.narrationTimer = 0
     if (this.narrationAudio) {
@@ -179,11 +199,15 @@ class SoundEngine {
     this.stopStems()
     this.stopNarration()
     const token = ++this.narrationToken
+    this.narrationActive = true
+    this.narrationStart = performance.now()
+    this.narrationEstimateSec = readingSeconds(fallbackText)
 
     let finished = false
     const finishOnce = () => {
       if (finished || token !== this.narrationToken) return
       finished = true
+      this.narrationActive = false
       window.clearTimeout(this.narrationTimer)
       if (this.narrationAudio) {
         this.narrationAudio.onended = null
@@ -195,6 +219,9 @@ class SoundEngine {
 
     const runTextFallback = () => {
       if (token !== this.narrationToken) return
+      // Text fallback: restart the progress clock from now.
+      this.narrationAudio = null
+      this.narrationStart = performance.now()
       const waitMs = readingSeconds(fallbackText) * 1000
       if (useTtsFallback) {
         speak(fallbackText, finishOnce)

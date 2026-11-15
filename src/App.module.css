@@ -157,9 +157,12 @@
   min-width: 0;
 }
 
-/* Keep the narration clear of the floating legend below it; long text scrolls instead. */
+/*
+ * Keep the narration clear of the floating legend below it (its height is measured in App).
+ * A margin, not padding: a scrolling box still draws its content inside its own padding.
+ */
 .app[data-unlocked] .main > aside {
-  padding-bottom: var(--legend-clearance);
+  margin-bottom: var(--legend-clearance);
 }
 
 .mapArea {
@@ -352,6 +355,6 @@
   }
 
   .app[data-unlocked] .main > aside {
-    padding-bottom: 0;
+    margin-bottom: 0;
   }
 }

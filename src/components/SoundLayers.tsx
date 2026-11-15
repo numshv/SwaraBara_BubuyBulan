@@ -20,7 +20,7 @@ interface LayerDef {
 
 export const LAYERS: LayerDef[] = [
   { id: 'wildfire', name: 'Wildfire', instrument: 'Bonang', color: '#de4a3d' },
-  { id: 'aerosol', name: 'Aerosol', instrument: 'Gong ageng', color: '#e8e4dc' },
+  { id: 'aerosol', name: 'Aerosol', instrument: 'Gong ageng', color: '#ea9a5cff' },
   { id: 'elnino', name: 'El Niño', instrument: 'Kendang', color: '#efcd57' },
   // Placeholder colour: the palette had no unused colour left.
   { id: 'iod', name: 'IOD', instrument: 'Slenthem', color: '#4fa3bf' },
@@ -28,12 +28,6 @@ export const LAYERS: LayerDef[] = [
 ]
 
 export const LAYER_NAMES = Object.fromEntries(LAYERS.map((l) => [l.id, l.name])) as Record<LayerId, string>
-
-/** White knob on dark tracks, dark knob on light ones (off-white aerosol, yellow El Niño). */
-function knobFor(hex: string): string {
-  const [r, g, b] = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16) / 255)
-  return 0.2126 * r + 0.7152 * g + 0.0722 * b > 0.55 ? '#161616' : '#ffffff'
-}
 
 /** Decay time in months: fire hits fade fast. */
 const FIRE_TAU = 0.05
@@ -119,7 +113,7 @@ export function SoundLayers({ layers, frames, aerosolPeaks, coPeaks, climate, t,
                 role="switch"
                 aria-checked={on}
                 className={styles.row}
-                style={{ '--c': color, '--knob': knobFor(color) } as CSSProperties}
+                style={{ '--c': color } as CSSProperties}
                 onClick={() => onToggle(id)}
                 aria-label={`${name}, played by ${instrument.toLowerCase()}`}
                 aria-describedby={`layer-${id}-value`}

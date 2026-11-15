@@ -64,6 +64,7 @@
 }
 
 .time {
+  font-family: var(--font-mono);
   font-size: 0.72rem;
   line-height: 16px;
   color: var(--text-faint);

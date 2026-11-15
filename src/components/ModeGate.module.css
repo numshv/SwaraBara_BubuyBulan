@@ -19,15 +19,46 @@
   gap: 20px;
 }
 
+.kickerRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.brandLogo {
+  height: 28px;
+  width: auto;
+  display: block;
+  object-fit: contain;
+}
+
+.kickerSep {
+  color: var(--rule-strong);
+}
+
 .kicker {
   margin: 0;
 }
 
+.headingGroup {
+  display: grid;
+  gap: 6px;
+}
+
 .title {
-  font-size: clamp(2rem, 4.6vw, 3.4rem);
+  font-size: clamp(2.2rem, 5vw, 3.6rem);
   font-weight: 500;
-  line-height: 1.08;
+  line-height: 1.05;
   letter-spacing: -0.02em;
+}
+
+.tagline {
+  margin: 0;
+  font-size: clamp(1.15rem, 2.2vw, 1.55rem);
+  font-weight: 400;
+  color: var(--text-dim);
+  letter-spacing: -0.01em;
 }
 
 .lead {

@@ -1,0 +1,66 @@
+.splash {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 14px;
+  padding: 32px;
+  text-align: center;
+  background: var(--bg);
+  opacity: 1;
+  transition: opacity 500ms var(--ease);
+  animation: fade-in var(--t-base) var(--ease) backwards;
+}
+
+.splash[data-leaving] {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.logo {
+  width: min(320px, 70vw);
+  height: auto;
+  display: block;
+}
+
+.name {
+  margin-top: 8px;
+  font-size: clamp(2rem, 5vw, 3rem);
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+}
+
+.tagline {
+  margin: 0;
+  font-size: clamp(1rem, 2vw, 1.3rem);
+  color: var(--text-dim);
+}
+
+.bar {
+  width: 160px;
+  height: 2px;
+  margin-top: 18px;
+  background: var(--rule);
+  overflow: hidden;
+}
+
+.bar span {
+  display: block;
+  height: 100%;
+  background: var(--accent);
+  transform-origin: left;
+  animation: fill 2200ms linear forwards;
+}
+
+@keyframes fill {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+

@@ -12,6 +12,8 @@ export interface Prefs {
   dramaticFx: boolean
   introTourDone: boolean
   playTourDone: boolean
+  /** The opening splash only shows on the very first visit. */
+  splashSeen: boolean
 }
 
 const KEY = 'wildfire-mockup-prefs'
@@ -22,6 +24,7 @@ const DEFAULTS: Prefs = {
   dramaticFx: true,
   introTourDone: false,
   playTourDone: false,
+  splashSeen: false,
 }
 
 function load(): Prefs {

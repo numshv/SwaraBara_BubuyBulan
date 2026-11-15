@@ -29,7 +29,7 @@ export const PLAY_STEPS: TourStep[] = [
   {
     target: '[data-tour="narration"]',
     title: 'Narration',
-    text: 'As the years pass, a narrator explains what is happening. The voice can be turned off in Settings, and N repeats the latest chapter.',
+    text: 'As the years pass, a narrator explains what is happening. Press N at any time to repeat the latest chapter.',
   },
   {
     target: '[data-tour="layers"]',

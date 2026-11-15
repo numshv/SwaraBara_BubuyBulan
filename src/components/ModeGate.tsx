@@ -19,10 +19,17 @@ export function ModeGate({ onChoose }: { onChoose: (mode: Mode) => void }) {
   return (
     <main className={styles.gate} aria-labelledby="gate-title">
       <div className={styles.inner}>
-        <p className={`${styles.kicker} eyebrow`}>A data sonification</p>
-        <h1 id="gate-title" className={styles.title}>
-          How wildfires in Indonesia changed from 2018 to 2025
-        </h1>
+        <div className={styles.kickerRow}>
+          <img src="/spaceappslogo.png" alt="NASA Space Apps Challenge" className={styles.brandLogo} />
+          <span className={styles.kickerSep} aria-hidden="true">·</span>
+          <p className={`${styles.kicker} eyebrow`}>A data sonification</p>
+        </div>
+        <div className={styles.headingGroup}>
+          <h1 id="gate-title" className={styles.title}>
+            Swara Bara
+          </h1>
+          <p className={styles.tagline}>Listening to Indonesia&apos;s wildfires, 2018–2025</p>
+        </div>
         <p className={styles.lead}>How would you like to experience this piece?</p>
         <div className={styles.choices}>
           <button ref={audioRef} type="button" className={styles.choice} onClick={() => onChoose('audio')}>

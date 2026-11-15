@@ -55,7 +55,7 @@
   width: 10px;
   height: 10px;
   border-radius: 50%;
-  background: #f4f2ee;
+  background: #ffffff;
   transition: transform var(--t-fast) var(--ease), background var(--t-fast) var(--ease);
 }
 
@@ -65,7 +65,7 @@
 
 .row[aria-checked='true'] .pill::after {
   transform: translateX(12px);
-  background: var(--knob);
+  background: #ffffff;
 }
 
 .name {
@@ -104,6 +104,7 @@
 
 .value {
   grid-area: value;
+  font-family: var(--font-mono);
   font-size: 0.72rem;
   color: var(--text-faint);
   font-variant-numeric: tabular-nums;

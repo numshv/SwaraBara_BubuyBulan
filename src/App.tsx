@@ -9,6 +9,7 @@ import { Legend } from './components/Legend'
 import { ModeGate } from './components/ModeGate'
 import { NarrationPanel } from './components/NarrationPanel'
 import { Player } from './components/Player'
+import { Splash } from './components/Splash'
 import { LAYER_NAMES, SoundLayers, type LayerId, type Layers } from './components/SoundLayers'
 import { INTRO_STEPS, PLAY_STEPS, Tour } from './components/Tour'
 import { describeHaze, getAerosol, type AerosolField } from './data/aerosol'
@@ -26,8 +27,16 @@ import styles from './App.module.css'
 
 export default function App() {
   const { prefs, update } = usePrefs()
+  const [splash, setSplash] = useState(!prefs.splashSeen)
+  const endSplash = useCallback(() => {
+    setSplash(false)
+    update({ splashSeen: true })
+    // update is recreated every render; only the first call matters.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+  if (splash) return <Splash onDone={endSplash} />
   return (
-    <AnnouncerProvider voice={prefs.mode === 'audio' && prefs.builtInVoice}>
+    <AnnouncerProvider voice={prefs.mode === 'audio'}>
       {prefs.mode ? <Experience prefs={prefs} update={update} /> : <ModeGate onChoose={(mode) => update({ mode })} />}
     </AnnouncerProvider>
   )
@@ -116,11 +125,11 @@ function Experience({ prefs, update }: { prefs: Prefs; update: (p: Partial<Prefs
           window.clearTimeout(holdTimer.current)
           holdTimer.current = window.setTimeout(() => setHolding(false), readingSeconds(message) * 1000)
         }
-      } else if (prefs.narrationVoice) {
+      } else {
         speak(`${cue.title}. ${cue.text}`)
       }
     },
-    [announce, audioMode, prefs.narrationVoice],
+    [announce, audioMode],
   )
 
   // Narration fires when playback crosses into a new chapter.
@@ -159,7 +168,7 @@ function Experience({ prefs, update }: { prefs: Prefs; update: (p: Partial<Prefs
 
   // Built-in voice: speak whatever receives focus (region labels announce their own stats).
   useEffect(() => {
-    if (!audioMode || !prefs.builtInVoice) return
+    if (!audioMode) return
     const onFocus = (e: FocusEvent) => {
       const el = e.target as HTMLElement
       if (el.closest('[data-tour="map"]')) return
@@ -168,7 +177,7 @@ function Experience({ prefs, update }: { prefs: Prefs; update: (p: Partial<Prefs
     }
     document.addEventListener('focusin', onFocus)
     return () => document.removeEventListener('focusin', onFocus)
-  }, [audioMode, prefs.builtInVoice])
+  }, [audioMode])
 
   useEffect(() => () => stopSpeaking(), [])
 
@@ -195,15 +204,37 @@ function Experience({ prefs, update }: { prefs: Prefs; update: (p: Partial<Prefs
     }
   }, [clock.playing, play, releaseHold])
 
+  // Set while "Show onboarding again" runs the intro tour, then the player tour, then the shortcut list.
+  const replaying = useRef(false)
+
+  function replayOnboarding() {
+    replaying.current = true
+    playAfterTour.current = false
+    releaseHold()
+    stopSpeaking()
+    dispatch({ type: 'pause' })
+    setDialog(null)
+    setUnlocked(true)
+    setTour('intro')
+  }
+
   function finishTour() {
     const stage = tour
     setTour(null)
-    if (stage === 'intro') update({ introTourDone: true })
+    if (stage === 'intro') {
+      update({ introTourDone: true })
+      if (replaying.current) setTour('play')
+    }
     if (stage === 'play') {
       update({ playTourDone: true })
       if (playAfterTour.current) {
         playAfterTour.current = false
         dispatch({ type: 'play' })
+      }
+      if (replaying.current) {
+        replaying.current = false
+        // The audio guide already lists the shortcuts; the visual tour doesn't.
+        if (!audioMode) setDialog('help')
       }
     }
   }
@@ -321,7 +352,8 @@ function Experience({ prefs, update }: { prefs: Prefs; update: (p: Partial<Prefs
   if (!songs || !data || !frame || !aerosol || !co) {
     return (
       <div className={styles.loading} role="status">
-        Preparing eight years of fire data…
+        <img src="/spaceappslogo.png" alt="NASA Space Apps Challenge" className={styles.loadingLogo} />
+        <p className={styles.loadingText}>Preparing eight years of NASA satellite data…</p>
       </div>
     )
   }
@@ -337,11 +369,14 @@ function Experience({ prefs, update }: { prefs: Prefs; update: (p: Partial<Prefs
 
       <header className={styles.header}>
         <div className={styles.topbar}>
-          {!national && (
-            <button type="button" className="link" onClick={backToIndonesia} aria-keyshortcuts="Escape">
-              ← Back to Indonesia
-            </button>
-          )}
+          <div className={styles.topLeft}>
+            <img src="/spaceappslogo.png" alt="NASA Space Apps Challenge" className={styles.brandLogo} />
+            {!national && (
+              <button type="button" className="link" onClick={backToIndonesia} aria-keyshortcuts="Escape">
+                ← Back to Indonesia
+              </button>
+            )}
+          </div>
           <nav className={styles.nav} aria-label="Tools" data-tour="help">
             <a
               className="link"
@@ -362,7 +397,16 @@ function Experience({ prefs, update }: { prefs: Prefs; update: (p: Partial<Prefs
         </div>
         <div className={styles.titleBlock}>
           <h1 key={song} ref={titleRef} tabIndex={-1} className={`${styles.title} appear`}>
-            {songTitle(song)}
+            {national ? (
+              <>
+                Swara Bara{' '}
+                <span className={styles.tagline}>
+                  — listening to Indonesia&apos;s wildfires, <span className={styles.nowrap}>2018–2025</span>
+                </span>
+              </>
+            ) : (
+              songTitle(song)
+            )}
           </h1>
           {/* Always rendered so it can collapse smoothly; hidden from AT while collapsed. */}
           <div className={styles.introWrap} data-hidden={(unlocked && national) || undefined} aria-hidden={(unlocked && national) || undefined}>
@@ -392,7 +436,7 @@ function Experience({ prefs, update }: { prefs: Prefs; update: (p: Partial<Prefs
             smokeOn={layers.aerosol}
             co={co}
             coOn={layers.co}
-            dramatic={prefs.dramaticFx}
+            dramatic={true}
             oceans={{
               enso: layers.elnino ? glide(climate.oni, clock.t) : null,
               iod: layers.iod ? glide(climate.iod, clock.t) : null,
@@ -469,7 +513,13 @@ function Experience({ prefs, update }: { prefs: Prefs; update: (p: Partial<Prefs
       )}
       {tour && audioMode && <AudioGuide key={tour} stage={tour} onDone={finishTour} />}
 
-      <SettingsDialog open={dialog === 'settings'} prefs={prefs} onChange={update} onClose={() => setDialog(null)} />
+      <SettingsDialog
+        open={dialog === 'settings'}
+        prefs={prefs}
+        onChange={update}
+        onReplayOnboarding={replayOnboarding}
+        onClose={() => setDialog(null)}
+      />
       <HelpDialog
         open={dialog === 'help'}
         onClose={() => setDialog(null)}

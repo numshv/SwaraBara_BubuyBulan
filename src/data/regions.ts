@@ -164,5 +164,7 @@ export function songName(song: SongId): string {
 }
 
 export function songTitle(song: SongId): string {
-  return `How wildfires in ${songName(song)} changed from 2018 to 2025`
+  return song === 'indonesia'
+    ? "Swara Bara — listening to Indonesia's wildfires, 2018–2025"
+    : `How wildfires in ${songName(song)} changed from 2018 to 2025`
 }

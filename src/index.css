@@ -1,17 +1,22 @@
-/* Visual direction: .scratch/inspo-2.jpg (flat charcoal, one sans, one coral accent, hairline rules). */
+/* Visual direction: flat dark space-charcoal editorial layout with subtle NASA Space Apps 2026 palette & typography tokens. */
 :root {
-  --bg: #161616;
-  --sea: #161616;
-  --land: #222222;
-  --land-active: #2a2a2a;
-  --neighbour: #1b1b1b;
-  --rule: #333333;
-  --rule-strong: #5c5c5c;
-  --text: #f0eeea;
-  --text-dim: #a8a6a1;
-  --text-faint: #8a8883;
-  --accent: #ff6a3d;
-  --font: 'Inter', system-ui, sans-serif;
+  --bg: #10141f;
+  --sea: #10141f;
+  --land: #1a2234;
+  --land-active: #232f47;
+  --neighbour: #141a28;
+  --rule: #263147;
+  --rule-strong: #4a5a78;
+  --text: #f2f4f8;
+  --text-dim: #a9b2c3;
+  --text-faint: #7f899e;
+  --accent: #e43700;
+  --focus: #eafe07;
+  --nasa-deep: #07173f;
+  --nasa-electric: #0042a6;
+  --font: 'Overpass', 'Inter', system-ui, sans-serif;
+  --font-display: 'Fira Sans', 'Overpass', 'Inter', system-ui, sans-serif;
+  --font-mono: 'Fira Code', ui-monospace, SFMono-Regular, Menlo, monospace;
   /* One easing and a few durations for every appear / disappear. */
   --ease: cubic-bezier(0.22, 0.61, 0.36, 1);
   --t-fast: 220ms;
@@ -69,7 +74,7 @@ button {
 }
 
 :focus-visible {
-  outline: 2px solid var(--accent);
+  outline: 2px solid var(--focus);
   outline-offset: 3px;
   border-radius: 2px;
 }
@@ -77,6 +82,7 @@ button {
 h1,
 h2,
 h3 {
+  font-family: var(--font-display);
   font-weight: 500;
   letter-spacing: -0.01em;
   margin: 0;
@@ -94,7 +100,7 @@ h3 {
   border: 0;
 }
 
-/* Small quiet label. Sentence case: the only all-caps text is the player's "NOW PLAYING". */
+/* Small quiet label. Sentence case: the only all-caps text is the player's "NOW PLAYING" and the Space Apps badge. */
 .eyebrow {
   font-size: 0.75rem;
   font-weight: 500;
@@ -163,8 +169,8 @@ h3 {
 
 dialog {
   color: var(--text);
-  background: #1d1d1d;
-  border: 0;
+  background: #141b2b;
+  border: 1px solid var(--rule);
   border-radius: 6px;
   padding: 0;
   max-width: min(600px, calc(100vw - 32px));
@@ -172,7 +178,7 @@ dialog {
 }
 
 dialog::backdrop {
-  background: rgba(0, 0, 0, 0.6);
+  background: rgba(5, 9, 18, 0.68);
 }
 
 dialog[open] {
@@ -187,7 +193,8 @@ kbd {
   display: inline-block;
   min-width: 1.6em;
   padding: 0 6px;
-  font: 500 0.78rem/1.6 var(--font);
+  font: 500 0.76rem/1.6 var(--font-mono);
+  font-variant-numeric: tabular-nums;
   text-align: center;
   border: 1px solid var(--rule-strong);
   border-radius: 4px;

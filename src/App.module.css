@@ -15,8 +15,20 @@
 .loading {
   height: 100%;
   display: grid;
-  place-items: center;
+  place-content: center;
+  justify-items: center;
+  gap: 16px;
   color: var(--text-dim);
+}
+
+.loadingLogo {
+  width: min(240px, 60vw);
+  height: auto;
+  display: block;
+}
+
+.loadingText {
+  margin: 0;
 }
 
 .skip {
@@ -57,6 +69,20 @@
   min-height: 28px;
 }
 
+.topLeft {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  flex-wrap: wrap;
+}
+
+.brandLogo {
+  height: 26px;
+  width: auto;
+  display: block;
+  object-fit: contain;
+}
+
 .nav {
   margin-left: auto;
   display: flex;
@@ -65,13 +91,22 @@
 
 .titleBlock {
   display: grid;
-  max-width: 44rem;
+  max-width: 52rem;
 }
 
 .title {
   font-size: clamp(1.5rem, 2.6vw, 2.2rem);
   font-weight: 500;
   line-height: 1.15;
+}
+
+.tagline {
+  font-weight: 300;
+  color: var(--text-dim);
+}
+
+.nowrap {
+  white-space: nowrap;
 }
 
 .title:focus {
